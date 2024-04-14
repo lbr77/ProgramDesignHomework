@@ -1,0 +1,8 @@
+//
+// Created by 22984 on 2024/4/5.
+//
+
+#ifndef COURSETEST_DATABASE_H
+#define COURSETEST_DATABASE_H
+
+#endif //COURSETEST_DATABASE_H
