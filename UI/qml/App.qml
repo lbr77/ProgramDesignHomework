@@ -6,17 +6,18 @@ import FluentUI
 
 Item {
     id: app
-
-
     Component.onCompleted: {
         FluApp.init(app)
         FluApp.windowIcon = "qrc:/UI/res/logo.ico"
         FluApp.routes = {
-            "/":"qrc:/UI/qml/window/MainWindow.qml",
             "/about": "qrc:/UI/qml/window/AboutWindow.qml",
             "/login": "qrc:/UI/qml/window/LoginWindow.qml",
             "/forgetPassword": "qrc:/UI/qml/window/ForgetPwdWindow.qml",
+            "/student": "qrc:/UI/qml/window/StudentWindow.qml",
+            "/teacher": "qrc:/UI/qml/window/TeacherWindow.qml",
+            "/admin": "qrc:/UI/qml/window/AdminWindow.qml",
         }
-        FluApp.navigate("/")
+        FluApp.navigate("/login")
+        console.log("Frontend loaded!");
     }
 }

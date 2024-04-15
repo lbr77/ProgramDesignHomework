@@ -1,14 +1,15 @@
 <RCC>
     <qresource prefix="/UI">
-        <file>qml/window/MainWindow.qml</file>
+        <file>qml/App.qml</file>
         <file>qml/window/AboutWindow.qml</file>
         <file>qml/window/LoginWindow.qml</file>
         <file>qml/window/ForgetPwdWindow.qml</file>
-        <file>qml/window/AccountWindow.qml</file>
-        <file>qml/page/StudentPage.qml</file>
-        <file>qml/page/TeacherPage.qml</file>
-        <file>qml/page/AdministratorPage.qml</file>
-        <file>qml/App.qml</file>
+        <file>qml/window/StudentWindow.qml</file>
+        <file>qml/window/TeacherWindow.qml</file>
+        <file>qml/view/stuGradeView.qml</file>
+        <file>qml/view/stuInfoView.qml</file>
+        <file>qml/view/teaCourseView.qml</file>
+        <file>qml/view/teaGradeView.qml</file>
         <file>res/logo.ico</file>
     </qresource>
 </RCC>

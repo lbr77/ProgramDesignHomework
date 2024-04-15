@@ -27,7 +27,7 @@ FluWindow{
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        FluApp.navigate("/")
+                        Qt.openUrlExternally(text_hublink.text)
                     }
                 }
             }

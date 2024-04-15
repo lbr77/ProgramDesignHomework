@@ -45,7 +45,7 @@ FluWindow {
             Layout.alignment: Qt.AlignHCenter
         }
         RowLayout{
-            anchors.horizontalCenter: parent.horizontalCenter
+            Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
             FluFilledButton{
                 text: "更新"
@@ -64,8 +64,7 @@ FluWindow {
                         showError("新密码不能与旧密码相同")
                         return
                     }
-                    // TODO: 判断密码
-                    let result = userManager.passwordChange(username,Opassword,Npassword);
+                    let result = backend.resetPassword(username,Opassword,Npassword);
                     if(result == 0){
                         showInfo("密码修改成功")
                     }else if(result == 1){
@@ -75,6 +74,8 @@ FluWindow {
                         showError("未知错误")
                         return;
                     }
+                    backend.Save();
+                    // 延时1.5ss关闭窗口
                     let timer = Qt.createQmlObject('import QtQuick 2.0; Timer {interval: 1500; running: true; repeat: false; onTriggered: {window.close();}}', window);
                 }
             }

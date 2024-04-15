@@ -7,7 +7,7 @@ import FluentUI 1.0
 FluContentPage{
 
     id:root
-    title: "校内成绩"
+    title: "所售课程"
     signal checkBoxChanged
 
     property var dataSource : []
@@ -207,7 +207,7 @@ FluContentPage{
         id:com_column_sort_score
         Item{
             FluText{
-                text: "成绩"
+                text: "平均分"
                 anchors.centerIn: parent
             }
             ColumnLayout{
@@ -293,25 +293,18 @@ FluContentPage{
             },
             {
                 title: table_view.customItem(com_column_sort_score,{sort:0}),
-                dataIndex: 'score',
+                dataIndex: 'average',
                 editDelegate:com_combobox,
                 width:100,
                 minimumWidth:100,
                 maximumWidth:100
             },
             {
-                title: "折合GPA",
-                dataIndex: "gpa",
-                width: 160,
-                minimumWidth:160,
-                maximumWidth:160
-            },
-            {
-                title: "学期",
-                dataIndex: 'term',
-                width:100,
-                minimumWidth:80,
-                maximumWidth:200
+                title: "及格率",
+                dataIndex: "percent",
+                width: 100,
+                minimumWidth: 100,
+                maximumWidth: 100
             }
         ]
     }
@@ -321,14 +314,13 @@ FluContentPage{
             checkbox: table_view.customItem(com_checbox,{checked: false}),
             courseid: data.courseid,
             title: data.title,
-            term: data.term,
-            score: data.score,
-            scoreid: data.scoreid,
-            gpa: data.gpa
+            average: data.average,
+            teacherid: data.teacherid,
+            percentage: data.percent
         };
     }
     function loadData(){
-        let datas = backend.getScoreList4Stu();
+        let datas = backend.getCourseList4Tea();
         const dataSource = []
         for(let data of datas){
             dataSource.push(makeData(data))

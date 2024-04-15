@@ -1,9 +1,12 @@
-f = open("data.csv").read().split("\n")
-f = [i.split(",") for i in f]
-r = open("user.txt", "w")
-import hashlib
-def md5(s):
-    return hashlib.md5(s.encode()).hexdigest()
-for i in f[1:]:
-    if i[0].find("552304") != -1:
-        r.write(f"{i[0]},{i[1]},{md5(i[1])},1,{i[0][:2]}\n")
+f = open("cmake-build-debug/user.txt",encoding='utf-8').read().split("\n")
+users = [i.split(",") for i in f if i != ""]
+f = open("cmake-build-debug/course.txt",encoding='utf-8').read().split("\n")
+courses = [i.split(",") for i in f if i != ""]
+import random
+students = [r for r in users if r[-2] == "1"]
+f = open("score.txt","w",encoding='utf-8')
+cnt = 1
+for student in students:
+    for course in courses:
+        cnt += 1
+        f.write(f"{cnt},{course[0]},{student[0]},{random.randint(50,100)}\n")

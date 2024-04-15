@@ -15,37 +15,43 @@ else()
     set(APPLICATION_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/release)
 endif()
 
-if(APPLE)
-    set(APPLICATION_REAL_PATH ${APPLICATION_OUTPUT_DIRECTORY}/${PROJECT_NAME}.app/Contents/MacOS)
-else()
-    set(APPLICATION_REAL_PATH ${APPLICATION_OUTPUT_DIRECTORY})
-endif()
-
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Quick)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick)
 
 find_program(QT_LUPDATE NAMES lupdate)
 find_program(QT_LRELEASE NAMES lrelease)
 
+set(UNIT_TESTING
+        test/unit_test.cpp
+        backend/io.cpp
+        backend/io.h
+        backend/database.cpp
+        backend/database.h
+        backend/const.h
+        backend/struct.h
+        backend/backendManager.h
+        backend/backendManager.cpp
+)
+qt_add_executable(unit_test ${UNIT_TESTING})
+add_test(NAME unit_test COMMAND unit_test)
 
 set(PROJECT_SOURCES
     main.cpp
-        backend/UserManager.cpp
-        backend/UserManager.h
+        backend/backendManager.h
+        backend/backendManager.cpp
+        backend/io.cpp
+        backend/io.h
+        backend/database.cpp
+        backend/database.h
+        backend/struct.h
+        backend/const.h
 )
 qt6_add_resources(PROJECT_SOURCES UI/qml.qrc)
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(${PROJECT_NAME}
+qt_add_executable(${PROJECT_NAME}
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         version.rc
-    )
-else()
-    add_executable(${PROJECT_NAME}
-        ${PROJECT_SOURCES}
-    )
-endif()
-
+)
 set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY_DEBUG "${APPLICATION_OUTPUT_DIRECTORY}"
     RUNTIME_OUTPUT_DIRECTORY_RELEASE "${APPLICATION_OUTPUT_DIRECTORY}"
@@ -56,11 +62,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Quick
     fluentuiplugin
 )
-
-if(${QT_VERSION} VERSION_LESS 6.1.0)
-    set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.${PROJECT_NAME})
-endif()
-
 set_target_properties(${PROJECT_NAME} PROPERTIES
     ${BUNDLE_ID_OPTION}
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
@@ -76,7 +77,5 @@ install(TARGETS ${PROJECT_NAME}
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-if(QT_VERSION_MAJOR EQUAL 6)
-    qt_import_qml_plugins(${PROJECT_NAME})
-    qt_finalize_executable(${PROJECT_NAME})
-endif()
+qt_import_qml_plugins(${PROJECT_NAME})
+qt_finalize_executable(${PROJECT_NAME})
