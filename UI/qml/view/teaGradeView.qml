@@ -8,110 +8,48 @@ FluContentPage{
 
     id:root
     title: "成绩列表"
-        signal checkBoxChanged
+    signal checkBoxChanged
 
     property var dataSource : []
+    property var courseList: []
     property int sortType: 0
     property bool seletedAll: true
-    property string nameKeyword: ""
-
-    onNameKeywordChanged: {
-        table_view.filter(function(item){
-            return item.name.includes(nameKeyword);
-        })
-    }
+    property int courseid: -1
 
     Component.onCompleted: ()=>{
-        loadData(1,1000)
-    }
-
-    onCheckBoxChanged: ()=>{
-        for(var i =0;i< table_view.rows ;i++){
-            if(false === table_view.getRow(i).checkbox.options.checked){
-                root.seletedAll = false
-                return
+        courseList = backend.getCourseList4Tea();
+        // dataSource = backend.getScoreList4Tea();
+        let data = [],dt=[]
+        for(let r of courseList){
+            data = backend.getStudentScoreList4Tea(r.courseid);
+            for(let s of data){
+                dt.push({
+                    // checkbox: table_view.customItem(com_checbox,{checked:true}),
+                    courseid: r.courseid,
+                    scoreid: s.scoreid,
+                    title: r.title,
+                    name: s.name,
+                    score: s.score,
+                    term: r.term,
+                    action: table_view.customItem(com_action,{})
+                })
             }
         }
-        root.seletedAll = true
+        dataSource = dt
+        table_view.dataSource = root.dataSource
     }
-
-    onSortTypeChanged: ()=>{
+    onCourseidChanged: ()=>{
         table_view.closeEditor()
-        if(sortType === 0){
-            table_view.sort()
-        }else if(sortType === 1){
-            table_view.sort(
-                    (l, r) =>{
-                    var lage = Number(l.age)
-                    var rage = Number(r.age)
-                    if(lage === rage){
-                        return l._key>r._key
-                    }
-                    return lage>rage
-                });
-        }else if(sortType === 2){
-            table_view.sort(
-                    (l, r) => {
-                    var lage = Number(l.age)
-                    var rage = Number(r.age)
-                    if(lage === rage){
-                        return l._key>r._key
-                    }
-                    return lage<rage
-                });
+        var data = []
+        for (var i = 0; i < dataSource.length; i++) {
+            var item = dataSource[i];
+            if (courseid === -1 || item.courseid === courseid) {
+                data.push(item);
+            }
         }
+        table_view.dataSource = data
     }
 
-    FluMenu{
-        id:pop_filter
-        width: 200
-        height: 89
-
-        contentItem: Item{
-
-            onVisibleChanged: {
-                if(visible){
-                    name_filter_text.text = root.nameKeyword
-                    name_filter_text.cursorPosition = name_filter_text.text.length
-                    name_filter_text.forceActiveFocus()
-                }
-            }
-
-            FluTextBox{
-                id:name_filter_text
-                anchors{
-                    left: parent.left
-                    right: parent.right
-                    top: parent.top
-                    leftMargin: 10
-                    rightMargin: 10
-                    topMargin: 10
-                }
-                iconSource: FluentIcons.Search
-            }
-
-            FluButton{
-                text: qsTr("Search")
-                anchors{
-                    bottom: parent.bottom
-                    right: parent.right
-                    bottomMargin: 10
-                    rightMargin: 10
-                }
-                onClicked: {
-                    root.nameKeyword = name_filter_text.text
-                    pop_filter.close()
-                }
-            }
-
-        }
-
-        function showPopup(){
-            table_view.closeEditor()
-            pop_filter.popup()
-        }
-
-    }
 
     Component{
         id:com_checbox
@@ -130,35 +68,41 @@ FluContentPage{
         }
     }
 
-    Component{
-        id:com_column_filter_name
-        Item{
-            FluText{
-                text: qsTr("Name")
-                anchors.centerIn: parent
-            }
-            FluIconButton{
-                width: 20
-                height: 20
-                iconSize: 12
-                verticalPadding:0
-                horizontalPadding:0
-                iconSource: FluentIcons.Filter
-                iconColor: {
-                    if("" !== root.nameKeyword){
-                        return FluTheme.primaryColor
+    FluContentDialog{
+        id: modify
+        title: "修改成绩"
+        property var onAcceptListener
+        property var scoreInfo
+        negativeText: "取消"
+        positiveText: "确定"
+        contentDelegate: Component{
+            Item{
+                implicitWidth: parent.width
+                implicitHeight: 60
+                FluTextBox{
+                    id: txt
+                    text: modify.scoreInfo.score
+                    anchors.centerIn: parent
+                    onTextChanged: {
+                        modify.scoreInfo.score = text
                     }
-                    return FluTheme.dark ?  Qt.rgba(1,1,1,1) : Qt.rgba(0,0,0,1)
                 }
-                anchors{
-                    right: parent.right
-                    rightMargin: 3
-                    verticalCenter: parent.verticalCenter
-                }
-                onClicked: {
-                    pop_filter.showPopup()
+                Component.onCompleted: {
+                    txt.text = modify.scoreInfo.score
+                    txt.forceActiveFocus()
                 }
             }
+        }
+        buttonFlags: FluContentDialogType.NegativeButton | FluContentDialogType.PositiveButton
+        onPositiveClicked: ()=>{
+            backend.changeScoreRec4Tea(modify.scoreInfo.scoreid,modify.scoreInfo.score)
+            table_view.dataSource.forEach((item,index)=>{
+                if(item.scoreid === modify.scoreInfo.scoreid){
+                    item.score = modify.scoreInfo.score
+                    table_view.setRow(index,item)
+                }
+            })
+            modify.close()
         }
     }
 
@@ -168,25 +112,23 @@ FluContentPage{
             RowLayout{
                 anchors.centerIn: parent
                 FluButton{
-                    text: qsTr("Delete")
-                    onClicked: {
+                    text: "删除"
+                    onClicked: ()=>{
                         table_view.closeEditor()
+                        backend.deleteScoreRec4Tea(table_view.getRow(row).scoreid)
                         table_view.removeRow(row)
                     }
                 }
                 FluFilledButton{
-                    text: qsTr("Edit")
-                    onClicked: {
-                        var obj = table_view.getRow(row)
-                        obj.name = "12345"
-                        table_view.setRow(row,obj)
-                        showSuccess(JSON.stringify(obj))
+                    text: "编辑"
+                    onClicked: ()=>{
+                        modify.scoreInfo = table_view.getRow(row)
+                        modify.open()
                     }
                 }
             }
         }
     }
-
 
     Component{
         id:com_column_checbox
@@ -216,140 +158,6 @@ FluContentPage{
         }
     }
 
-    Component{
-        id:com_combobox
-        FluComboBox {
-            anchors.fill: parent
-            focus: true
-            editText: display
-            editable: true
-            model: ListModel {
-                ListElement { text: "100" }
-                ListElement { text: "300" }
-                ListElement { text: "500" }
-                ListElement { text: "1000" }
-            }
-            Component.onCompleted: {
-                currentIndex=["100","300","500","1000"].findIndex((element) => element === display)
-                selectAll()
-            }
-            onCommit: {
-                editTextChaged(editText)
-                tableView.closeEditor()
-            }
-        }
-    }
-
-    Component{
-        id:com_avatar
-        Item{
-            FluClip{
-                anchors.centerIn: parent
-                width: 40
-                height: 40
-                radius: [20,20,20,20]
-                Image{
-                    anchors.fill: parent
-                    source: {
-                        if(options && options.avatar){
-                            return options.avatar
-                        }
-                        return ""
-                    }
-                    sourceSize: Qt.size(80,80)
-                }
-            }
-        }
-    }
-
-    Component{
-        id:com_column_update_title
-        Item{
-            FluText{
-                id:text_title
-                text: {
-                    if(options.title){
-                        return options.title
-                    }
-                    return ""
-                }
-                anchors.fill: parent
-                verticalAlignment: Qt.AlignVCenter
-                horizontalAlignment: Qt.AlignHCenter
-                elide: Text.ElideRight
-            }
-            MouseArea{
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    custom_update_dialog.showDialog(options.title,function(text){
-                        itemModel.display = table_view.customItem(com_column_update_title,{"title":text})
-                    })
-                }
-            }
-        }
-    }
-
-    Component{
-        id:com_column_sort_age
-        Item{
-            FluText{
-                text: qsTr("Age")
-                anchors.centerIn: parent
-            }
-            ColumnLayout{
-                spacing: 0
-                anchors{
-                    right: parent.right
-                    verticalCenter: parent.verticalCenter
-                    rightMargin: 4
-                }
-                FluIconButton{
-                    Layout.preferredWidth: 20
-                    Layout.preferredHeight: 15
-                    iconSize: 12
-                    verticalPadding:0
-                    horizontalPadding:0
-                    iconSource: FluentIcons.ChevronUp
-                    iconColor: {
-                        if(1 === root.sortType){
-                            return FluTheme.primaryColor
-                        }
-                        return FluTheme.dark ?  Qt.rgba(1,1,1,1) : Qt.rgba(0,0,0,1)
-                    }
-                    onClicked: {
-                        if(root.sortType === 1){
-                            root.sortType = 0
-                            return
-                        }
-                        root.sortType = 1
-                    }
-                }
-                FluIconButton{
-                    Layout.preferredWidth: 20
-                    Layout.preferredHeight: 15
-                    iconSize: 12
-                    verticalPadding:0
-                    horizontalPadding:0
-                    iconSource: FluentIcons.ChevronDown
-                    iconColor: {
-                        if(2 === root.sortType){
-                            return FluTheme.primaryColor
-                        }
-                        return FluTheme.dark ?  Qt.rgba(1,1,1,1) : Qt.rgba(0,0,0,1)
-                    }
-                    onClicked: {
-                        if(root.sortType === 2){
-                            root.sortType = 0
-                            return
-                        }
-                        root.sortType = 2
-                    }
-                }
-            }
-        }
-    }
-
     FluArea{
         id:layout_controls
         anchors{
@@ -367,183 +175,177 @@ FluContentPage{
                 leftMargin: 10
                 verticalCenter: parent.verticalCenter
             }
-
-            FluButton{
-                text: qsTr("Clear All")
-                onClicked: {
-                    table_view.dataSource = []
-                }
+            FluText{
+                text: "课程："
+                Layout.alignment: Qt.AlignVCenter
             }
-
-            FluButton{
-                text: qsTr("Delete Selection")
-                onClicked: {
-                    var data = []
-                    var rows = []
-                    for (var i = 0; i < table_view.rows; i++) {
-                        var item = table_view.getRow(i);
-                        rows.push(item)
-                        if (!item.checkbox.options.checked) {
-                            data.push(item);
+            FluDropDownButton{
+                id: sel_btn
+                text:"选择课程"
+                Layout.alignment: Qt.AlignVCenter
+                FluMenuItem{
+                    text: "全部"
+                    onClicked: ()=>{
+                        sel_btn.text = "选择课程"
+                        root.courseid = -1
+                    }
+                }
+                Repeater{
+                    model: root.courseList
+                    FluMenuItem{
+                        text: modelData.title
+                        onClicked: ()=>{
+                            sel_btn.text = text
+                            root.courseid = modelData.courseid
                         }
                     }
-                    var sourceModel = table_view.sourceModel;
-                    for (i = 0; i < sourceModel.rowCount; i++) {
-                        var sourceItem = sourceModel.getRow(i);
-                        const foundItem = rows.find(item=> item._key === sourceItem._key)
-                        if (!foundItem) {
-                            data.push(sourceItem);
-                        }
-                    }
-                    table_view.dataSource = data
                 }
             }
-
             FluButton{
-                text: qsTr("Add a row of Data")
-                onClicked: {
-                    table_view.appendRow(genTestObject())
+                text: "导入成绩"
+                onClicked: ()=>{
+                    showError("未实现")
                 }
             }
-
+            FluButton{
+                text: "添加成绩"
+                onClicked: ()=>{
+                    add_score.open()
+                }
+            }
         }
     }
-
+    FluContentDialog{
+        id: add_score
+        title: "添加成绩"
+        property var usrname
+        property var courseid
+        property var score
+        negativeText: "取消"
+        positiveText: "确定"
+        contentDelegate: Component{
+            Item{
+                implicitWidth: parent.width
+                implicitHeight: 100
+                anchors.fill: parent
+                ColumnLayout{
+                    anchors.centerIn: parent
+                    spacing: 10
+                    Row{
+                        FluText{
+                            text: "课程："
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluDropDownButton{
+                            id: sel_btn
+                            text:"选择课程"
+                            Layout.alignment: Qt.AlignVCenter
+                            Repeater{
+                                model: root.courseList
+                                FluMenuItem{
+                                    text: modelData.title
+                                    onClicked: ()=>{
+                                        sel_btn.text = text
+                                        add_score.courseid = modelData.courseid
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "学生："
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_name
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                add_score.usrname = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "分数："
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_score
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                add_score.score = parseInt(text)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        buttonFlags: FluContentDialogType.NegativeButton | FluContentDialogType.PositiveButton
+        onPositiveClicked: ()=>{
+            console.log(JSON.stringify(add_score.scoreInfo))
+            let uid = backend.findStudentIdByName(usrname);
+            if(uid === "")add_score.close()
+            let d = backend.addScoreRec4Tea(courseid,uid,score);
+            console.log(JSON.stringify(d))
+            table_view.dataSource.push({
+                                             courseid: courseid,
+                                             scoreid: d.scoreid,
+                                             title: sel_btn.text,
+                                             name: usrname,
+                                             score: score,
+                                             term: d.term,
+                                             action: table_view.customItem(com_action,{})
+                                         });
+            add_score.close()
+        }
+    }
     FluTableView{
         id:table_view
         anchors{
             left: parent.left
             right: parent.right
             top: layout_controls.bottom
-            bottom: gagination.top
+            bottom: parent.bottom
         }
         anchors.topMargin: 5
-        onRowsChanged: {
+        anchors.bottomMargin: 50
+        onRowsChanged: ()=>{
             root.checkBoxChanged()
         }
         columnSource:[
             {
-                title: table_view.customItem(com_column_checbox,{checked:true}),
-                dataIndex: 'checkbox',
-                width:100,
-                minimumWidth:100,
-                maximumWidth:100
+                title: "课程名",
+                dataIndex: 'title',
+                width: 625,
+                minimumWidth:625,
+                maximumWidth:625
             },
             {
-                title: table_view.customItem(com_column_update_title,{title:qsTr("Avatar")}),
-                dataIndex: 'avatar',
-                width:100
+                title: "名字",
+                dataIndex: 'name'
             },
             {
-                title: table_view.customItem(com_column_filter_name,{title:qsTr("Name")}),
-                dataIndex: 'name',
-                readOnly:true
-            },
-            {
-                title: table_view.customItem(com_column_sort_age,{sort:0}),
-                dataIndex: 'age',
-                editDelegate:com_combobox,
-                width:100,
-                minimumWidth:100,
-                maximumWidth:100
-            },
-            {
-                title: qsTr("Address"),
-                dataIndex: 'address',
-                width:200,
-                minimumWidth:100,
-                maximumWidth:250
-            },
-            {
-                title: qsTr("Nickname"),
-                dataIndex: 'nickname',
-                width:100,
+                title: "分数",
+                dataIndex: 'score',
+                width:80,
                 minimumWidth:80,
-                maximumWidth:200
+                maximumWidth:80
             },
             {
-                title: qsTr("Long String"),
-                dataIndex: 'longstring',
-                width:200,
-                minimumWidth:100,
-                maximumWidth:300
+                title: "学期",
+                dataIndex: 'term',
+                width:80,
+                minimumWidth:80,
+                maximumWidth:80
             },
             {
-                title: qsTr("Options"),
+                title: "操作",
                 dataIndex: 'action',
-                width:160,
-                minimumWidth:160,
-                maximumWidth:160
+                width: 200,
+                minimumWidth:200,
+                maximumWidth:200
             }
         ]
-    }
-
-    FluPagination{
-        id:gagination
-        anchors{
-            bottom: parent.bottom
-            left: parent.left
-        }
-        pageCurrent: 1
-        itemCount: 100000
-        pageButtonCount: 7
-        __itemPerPage: 1000
-        previousText: qsTr("<Previous")
-        nextText: qsTr("Next>")
-        onRequestPage:
-                (page,count)=> {
-            table_view.closeEditor()
-            loadData(page,count)
-            table_view.resetPosition()
-        }
-    }
-
-    function genTestObject(){
-        var ages = ["100", "300", "500", "1000"];
-        function getRandomAge() {
-            var randomIndex = Math.floor(Math.random() * ages.length);
-            return ages[randomIndex];
-        }
-        var names = ["孙悟空", "猪八戒", "沙和尚", "唐僧","白骨夫人","金角大王","熊山君","黄风怪","银角大王"];
-        function getRandomName(){
-            var randomIndex = Math.floor(Math.random() * names.length);
-            return names[randomIndex];
-        }
-        var nicknames = ["复海大圣","混天大圣","移山大圣","通风大圣","驱神大圣","齐天大圣","平天大圣"]
-        function getRandomNickname(){
-            var randomIndex = Math.floor(Math.random() * nicknames.length);
-            return nicknames[randomIndex];
-        }
-        var addresses = ["傲来国界花果山水帘洞","傲来国界坎源山脏水洞","大唐国界黑风山黑风洞","大唐国界黄风岭黄风洞","大唐国界骷髅山白骨洞","宝象国界碗子山波月洞","宝象国界平顶山莲花洞","宝象国界压龙山压龙洞","乌鸡国界号山枯松涧火云洞","乌鸡国界衡阳峪黑水河河神府"]
-        function getRandomAddresses(){
-            var randomIndex = Math.floor(Math.random() * addresses.length);
-            return addresses[randomIndex];
-        }
-        var avatars = ["qrc:/example/res/svg/avatar_1.svg", "qrc:/example/res/svg/avatar_2.svg", "qrc:/example/res/svg/avatar_3.svg", "qrc:/example/res/svg/avatar_4.svg","qrc:/example/res/svg/avatar_5.svg","qrc:/example/res/svg/avatar_6.svg","qrc:/example/res/svg/avatar_7.svg","qrc:/example/res/svg/avatar_8.svg","qrc:/example/res/svg/avatar_9.svg","qrc:/example/res/svg/avatar_10.svg","qrc:/example/res/svg/avatar_11.svg","qrc:/example/res/svg/avatar_12.svg"];
-        function getAvatar(){
-            var randomIndex = Math.floor(Math.random() * avatars.length);
-            return avatars[randomIndex];
-        }
-        return {
-            checkbox: table_view.customItem(com_checbox,{checked:root.seletedAll}),
-            avatar:table_view.customItem(com_avatar,{avatar:getAvatar()}),
-            name: getRandomName(),
-            age:getRandomAge(),
-            address: getRandomAddresses(),
-            nickname: getRandomNickname(),
-            longstring:"你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好",
-            action: table_view.customItem(com_action),
-            _minimumHeight:50,
-            _key:FluTools.uuid()
-        }
-    }
-    function loadData(page,count){
-        root.seletedAll = true
-        const dataSource = []
-        for(var i=0;i<count;i++){
-            dataSource.push(genTestObject())
-        }
-        root.dataSource = dataSource
-        table_view.dataSource = root.dataSource
     }
 }

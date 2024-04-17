@@ -4,6 +4,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import FluentUI
 FluWindow{
+    id: windows
     maximumWidth: 1440
     maximumHeight: 900
     width: 1440
@@ -38,6 +39,7 @@ FluWindow{
                 onTriggered: ()=>{
                     backend.logout();
                     FluApp.navigate("/login");
+                    windows.close();
                 }
             }
         }
@@ -99,7 +101,7 @@ FluWindow{
             }
             FluPaneItem{
                 title: "统计信息"
-                url: "qrc:/UI/qml/view/teaStatusView.qml"
+                url: "qrc:/UI/qml/view/teaStatView.qml"
                 onTap: ()=>{
                     console.log("切换页面 " + url);
                     nav_view.push(url);

@@ -4,7 +4,7 @@ import QtQuick.Controls
 import FluentUI
 FluWindow {
     id: window
-    title: "修改密码"
+    title: "学生成绩管理系统 - 修改密码"
     width: 400
     height: 400
     fixSize: true
@@ -20,6 +20,11 @@ FluWindow {
             left: parent.left
             right: parent.right
             verticalCenter: parent.verticalCenter
+        }
+        FluText{
+            text: "修改密码"
+            font: FluTextStyle.Title
+            Layout.alignment: Qt.AlignHCenter
         }
         FluTextBox{
             id: textbox_uesrname
@@ -67,10 +72,10 @@ FluWindow {
                     let result = backend.resetPassword(username,Opassword,Npassword);
                     if(result == 0){
                         showInfo("密码修改成功")
-                    }else if(result == 1){
+                    }else if(result == -1){
                         showError("旧密码错误")
                         return;
-                    }else if(result == 2){
+                    }else if(result == -2){
                         showError("未知错误")
                         return;
                     }

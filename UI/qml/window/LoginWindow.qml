@@ -4,7 +4,7 @@ import QtQuick.Controls
 import FluentUI
 FluWindow {
     id: window
-    title: "登录"
+    title: "学生成绩管理系统 - 登录"
     width: 400
     height: 400
     fixSize: true
@@ -36,6 +36,11 @@ FluWindow {
             left: parent.left
             right: parent.right
             verticalCenter: parent.verticalCenter
+        }
+        FluText{
+            text: "登录"
+            font: FluTextStyle.Title
+            Layout.alignment: Qt.AlignHCenter
         }
         FluTextBox{
             id: textbox_uesrname

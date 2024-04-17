@@ -217,12 +217,12 @@ void backendManager::saveExtra(){
 
 //---------------------------------START Basic Functions -----------------------------------------
 backendManager::backendManager() {
-    qDebug()<<"[INFO] ------------------------BackendManager initalizing Started.-------------------------";
+    qDebug()<<"[INFO] BackendManager initalizing Started.";
     this->initUser();
     this->initCourse();
     this->initScore();
     this->initExtra();
-    qDebug()<<"[INFO] ------------------------BackendManager initialized.---------------------------------";
+    qDebug()<<"[INFO] BackendManager initialized.";
 }
 backendManager::~backendManager() {
     this->saveUser();
@@ -267,11 +267,15 @@ int backendManager::logout(){
     this->permission = -1;
     return 0;
 }
-int backendManager::resetPassword(QString oPass,QString nPass){
-    auto usrptr = toNewConstChar(this->username);
+int backendManager::resetPassword(QString username,QString oPass,QString nPass){
+    auto usrptr = toNewConstChar(username);
+
+    qDebug()<<"[INFO] User"<<username<<"attempts to reset password.";
     auto *user = this->getUser(usrptr);
+    if(user == NULL)return -1;
     if(strcmp(user->password,toNewConstChar(md5(oPass))) == 0){
         user->password = const_cast<char *>(toNewConstChar(md5(nPass)));
+        delete usrptr;
         return 0;
     }
     delete usrptr;
@@ -423,8 +427,8 @@ QJsonArray backendManager::getGPAByTerm4Stu() {
     return arr;
 }
 //Write
-int backendManager::addScoreRec4Tea(QString courseid, QString studentid, int score){
-    if(this->permission <= 1)return -1; // No permission
+QJsonObject backendManager::addScoreRec4Tea(QString courseid, QString studentid, int score){
+    if(this->permission <= 1)return QJsonObject(); // No permission
     qDebug()<<"[INFO] User"<<this->username<<"add score record:"<<courseid<<studentid<<score;
     auto *scoreit = (Score *)malloc(sizeof(Score));
     scoreit->scoreid = ++this->scoreidx;
@@ -432,7 +436,13 @@ int backendManager::addScoreRec4Tea(QString courseid, QString studentid, int sco
     scoreit->studentid = const_cast<char*>(toNewConstChar(studentid));
     scoreit->score = score;
     insertList(this->scorelist,scoreit);
-    return 0;
+    QJsonObject obj;
+    obj.insert("scoreid",scoreit->scoreid);
+    obj.insert("courseid",scoreit->courseid);
+    obj.insert("studentid",scoreit->studentid);
+    obj.insert("score",scoreit->score);
+    obj.insert("term",this->getCourse(scoreit->courseid)->term);
+    return obj;
 }
 int backendManager::deleteScoreRec4Tea(QString sid){
     if(this->permission <= 1)return -1; // No permission
@@ -472,6 +482,7 @@ QJsonArray backendManager::getStudentScoreList4Tea(int courseid){
         if(score->courseid == cid){
             auto user = this->getUser(score->studentid);
             QJsonObject obj;
+            obj.insert("scoreid",score->scoreid);
             obj.insert("userid",user->userid);
             obj.insert("name",user->name);
             obj.insert("permission",user->permission);
@@ -511,6 +522,7 @@ QJsonArray backendManager::getCourseList4Tea(){
             obj.insert("courseid",course->courseid);
             obj.insert("teacherid",course->teacherid);
             obj.insert("title",course->title);
+            obj.insert("term",course->term);
             obj.insert("average",this->getScoreAverage(course->courseid));
             obj.insert("percentage",this->getCoursePercentage4Tea(course->courseid));
             arr.append(obj);
@@ -551,4 +563,43 @@ int backendManager::deleteUserRec4Admin(QString userid) {
     qDebug()<<"[INFO] User"<<this->username<<"delete user record";
     this->deleteUser(toNewConstChar(userid));
     return 0;
+}
+
+void backendManager::changeScoreRec4Tea(QString sid, int score) {
+    if(this->permission <= 1)return; // No permission
+    qDebug()<<"[INFO] User"<<this->username<<"change score record:"<<sid<<score;
+    for(int i=0;i<sizeList(this->scorelist);i++){
+        auto scoreit = (Score *)getListNode(this->scorelist,i);
+        if(scoreit->scoreid == sid.toInt()){
+            scoreit->score = score;
+            return;
+        }
+    }
+}
+
+QJsonArray backendManager::getStudentList() {
+    if(this->permission <= 1)return QJsonArray(); // No permission
+    QJsonArray arr;
+    for(int i=0;i<sizeList(this->userList);i++){
+        auto user = (User *)getListNode(this->userList,i);
+        if(user->permission == 1){
+            QJsonObject obj;
+            obj.insert("userid",user->userid);
+            obj.insert("name",user->name);
+            obj.insert("major",user->major);
+            arr.append(obj);
+        }
+    }
+    return arr;
+}
+
+QString backendManager::findStudentIdByName(QString name) {
+    if(this->permission <= 1)return ""; // No permission
+    for(int i=0;i<sizeList(this->userList);i++){
+        auto user = (User *)getListNode(this->userList,i);
+        if(strcmp(user->name,std::move(name).toStdString().c_str()) == 0){
+            return user->userid;
+        }
+    }
+    return "";
 }

@@ -4,6 +4,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import FluentUI
 FluWindow{
+    id: windows
     maximumWidth: 1440
     maximumHeight: 900
     width: 1440
@@ -38,6 +39,7 @@ FluWindow{
                 onTriggered: ()=>{
                     backend.logout();
                     FluApp.navigate("/login");
+                    windows.close();
                 }
             }
         }

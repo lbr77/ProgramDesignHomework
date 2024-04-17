@@ -184,7 +184,8 @@ FluContentPage{
                     onTextChanged: {
                         modify_info.text = usersss.text
                     }
-                }Component.onCompleted: {
+                }
+                Component.onCompleted: {
                     usersss.text = user.name
                     usersss.forceActiveFocus()
                 }

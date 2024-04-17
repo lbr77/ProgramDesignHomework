@@ -57,28 +57,31 @@ public:
     backendManager();
     ~backendManager();
     // Account related
-    Q_INVOKABLE int login(QString username,QString password); // DONE
-    Q_INVOKABLE int logout(); // DONE
-    Q_INVOKABLE int resetPassword(QString oPass,QString nPass); // DONE
+    Q_INVOKABLE int login(QString username,QString password); // DONE(Used)
+    Q_INVOKABLE int logout(); // DONE(Used)
+    Q_INVOKABLE int resetPassword(QString username,QString oPass,QString nPass); // DONE(Used)
     // Misc
-    Q_INVOKABLE void Save(); //DONE
-    Q_INVOKABLE int getPermission(); //DONE
-    Q_INVOKABLE QJsonObject getUserInfo(); //DONE //获取当前用户信息 json object
-    Q_INVOKABLE QJsonObject getUserInfo(QString userid); //DONE
-    Q_INVOKABLE QJsonObject getCourseInfo(int courseid); //DONE
-    Q_INVOKABLE void changeUserInfo(QString name,int major,QString userid); //DONE //信息改变(包括转专业等)
+    Q_INVOKABLE void Save(); //DONE(Used)
+    Q_INVOKABLE int getPermission(); //DONE(Used)
+    Q_INVOKABLE QJsonObject getUserInfo(); //DONE(Used) //获取当前用户信息 json object
+    Q_INVOKABLE QJsonObject getUserInfo(QString userid); //DONE(Used)
+    Q_INVOKABLE QJsonObject getCourseInfo(int courseid); //DONE(Used)
+    Q_INVOKABLE void changeUserInfo(QString name,int major,QString userid); //DONE(Used) //信息改变(包括转专业等)
     //Student related
-    Q_INVOKABLE QJsonArray getScoreList4Stu();//DONE //学生成绩列表
-    Q_INVOKABLE double getTotalGPA4Stu();//DONE //计算总GPA
-    Q_INVOKABLE QJsonArray getGPAByTerm4Stu();//DONE  //计算每学期GPA (Line Chart)
+    Q_INVOKABLE QJsonArray getScoreList4Stu();//DONE(Used) //学生成绩列表
+    Q_INVOKABLE double getTotalGPA4Stu();//DONE(Used) //计算总GPA
+    Q_INVOKABLE QJsonArray getGPAByTerm4Stu();//DONE(Used)  //计算每学期GPA (Line Chart)
 //    Q_INVOKABLE QJsonArray getArticleList4Stu(); //(素质) 论文
 //    Q_INVOKABLE QJsonArray getProjectList4Stu(); //(素质) 项目
 //    Q_INVOKABLE QJsonArray getCompetetionList4Stu(); //(素质) 竞赛
     //Teacher related
-    Q_INVOKABLE int addScoreRec4Tea(QString courseid, QString studentid, int score); //DONE
+    Q_INVOKABLE QJsonArray getStudentList(); //DONE(Used)
+    Q_INVOKABLE QString findStudentIdByName(QString name); //DONE(Used)
+    Q_INVOKABLE QJsonObject addScoreRec4Tea(QString courseid, QString studentid, int score); //DONE
     Q_INVOKABLE QJsonArray getStudentScoreList4Tea(int courseid); //DONE
     double getCoursePercentage4Tea(int courseid); //DONE
     Q_INVOKABLE int deleteScoreRec4Tea(QString sid); //DONE
+    Q_INVOKABLE void changeScoreRec4Tea(QString sid, int score); //DONE
     Q_INVOKABLE QJsonArray getCourseList4Tea(); //DONE
     Q_INVOKABLE double getScoreAverage(int courseid); //DONE
     //Admin related
