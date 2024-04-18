@@ -89,6 +89,7 @@ public:
     Q_INVOKABLE int addUserRec4Admin(QString userid,QString name,QString password,int permission,int major);//DONE
     Q_INVOKABLE QJsonArray getUserList4Admin();
     Q_INVOKABLE int deleteUserRec4Admin(QString userid);//DONE
+    Q_INVOKABLE QJsonObject modifyUserRec4Admin(QString userid,QString name,QString password,int permission,int major);//DONE
 };
 
 #endif //COURSEWORK_BACKEND_H

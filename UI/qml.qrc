@@ -6,11 +6,16 @@
         <file>qml/window/ForgetPwdWindow.qml</file>
         <file>qml/window/StudentWindow.qml</file>
         <file>qml/window/TeacherWindow.qml</file>
+        <file>qml/window/AdminWindow.qml</file>
         <file>qml/view/stuGradeView.qml</file>
         <file>qml/view/stuInfoView.qml</file>
         <file>qml/view/teaCourseView.qml</file>
         <file>qml/view/teaGradeView.qml</file>
         <file>qml/view/teaStatView.qml</file>
+        <file>qml/view/adminUserView.qml</file>
+        <file>qml/view/adminCourseView.qml</file>
+        <file>qml/view/adminScoreView.qml</file>
+        <file>qml/view/adminUserView.qml</file>
         <file>res/logo.ico</file>
     </qresource>
 </RCC>

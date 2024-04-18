@@ -147,6 +147,7 @@ FluContentPage{
                                 fill: false,
                                 borderColor: 'rgb(192, 75, 192)',
                                 tension: 0.1,
+                                borderDash: [5, 5]
                             }]
                         }
                     }

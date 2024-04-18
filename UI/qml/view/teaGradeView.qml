@@ -283,20 +283,18 @@ FluContentPage{
         }
         buttonFlags: FluContentDialogType.NegativeButton | FluContentDialogType.PositiveButton
         onPositiveClicked: ()=>{
-            console.log(JSON.stringify(add_score.scoreInfo))
             let uid = backend.findStudentIdByName(usrname);
             if(uid === "")add_score.close()
             let d = backend.addScoreRec4Tea(courseid,uid,score);
-            console.log(JSON.stringify(d))
             table_view.dataSource.push({
-                                             courseid: courseid,
-                                             scoreid: d.scoreid,
-                                             title: sel_btn.text,
-                                             name: usrname,
-                                             score: score,
-                                             term: d.term,
-                                             action: table_view.customItem(com_action,{})
-                                         });
+                courseid: courseid,
+                scoreid: d.scoreid,
+                title: sel_btn.text,
+                name: usrname,
+                score: score,
+                term: d.term,
+                action: table_view.customItem(com_action,{})
+            });
             add_score.close()
         }
     }

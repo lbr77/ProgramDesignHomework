@@ -329,6 +329,7 @@ FluContentPage{
     }
     function loadData(){
         let datas = backend.getScoreList4Stu();
+
         const dataSource = []
         for(let data of datas){
             dataSource.push(makeData(data))

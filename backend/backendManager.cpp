@@ -347,6 +347,7 @@ QJsonArray backendManager::getScoreList4Stu(){ //权限 > 1
             obj.insert("score",score->score);
             obj.insert("gpa",calcGPA(score->score));
             auto course = this->getCourse(score->courseid);
+            if(course == NULL)continue;
             obj.insert("title",course->title);
             obj.insert("term",course->term);
             obj.insert("power",course->power);
@@ -469,6 +470,7 @@ QJsonArray backendManager::getUserList4Admin(){
         obj.insert("name",user->name);
         obj.insert("permission",user->permission);
         obj.insert("major",user->major);
+        obj.insert("password",user->password);
         arr.append(obj);
     }
     return arr;
@@ -542,7 +544,7 @@ double backendManager::getCoursePercentage4Tea(int courseid) {
         count += 1;
     }
     if(count == 0)return 0;
-    return total / count * 100;
+    return (double)(total* 100 / count) ;
 }
 double backendManager::getScoreAverage(int courseid) {
     if(this->permission <= 1)return 0; // No permission
@@ -602,4 +604,21 @@ QString backendManager::findStudentIdByName(QString name) {
         }
     }
     return "";
+}
+
+QJsonObject backendManager::modifyUserRec4Admin(QString userid, QString name, QString password, int permission, int major) {
+    if(this->permission <= 2)return QJsonObject(); // No permission
+    qDebug()<<"[INFO] User"<<this->username<<"modify user record:"<<userid<<name<<password<<permission<<major;
+    auto *user = this->getUser(toNewConstChar(userid));
+    user->name = const_cast<char*>(toNewConstChar(name));
+    user->password = const_cast<char*>(toNewConstChar(md5(password)));
+    user->permission = permission;
+    user->major = major;
+    QJsonObject obj;
+    obj.insert("userid",user->userid);
+    obj.insert("name",user->name);
+    obj.insert("permission",user->permission);
+    obj.insert("major",user->major);
+    obj.insert("password",user->password);
+    return obj;
 }

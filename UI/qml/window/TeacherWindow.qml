@@ -65,10 +65,6 @@ FluWindow{
             backend.Save();
         }
     }
-    Component.onCompleted: {
-        console.log("Loading Completed");
-        // Do sth
-    }
     FluNavigationView{
         id: nav_view
         width: parent.width
@@ -85,7 +81,7 @@ FluWindow{
                 title: "课程列表" // 表格
                 url: "qrc:/UI/qml/view/teaCourseView.qml"
                 onTap: ()=>{
-                    console.log("切换页面 " + url);
+                    console.log("[INFO] 切换页面 " + url);
                     nav_view.push(url);
                 }
                 icon: FluentIcons.PhoneBook
@@ -94,7 +90,7 @@ FluWindow{
                 title: "学生成绩"
                 url: "qrc:/UI/qml/view/teaGradeView.qml"
                 onTap: ()=>{
-                    console.log("切换页面 " + url);
+                    console.log("[INFO] 切换页面 " + url);
                     nav_view.push(url);
                 }
                 icon: FluentIcons.BookmarksMirrored
@@ -103,7 +99,7 @@ FluWindow{
                 title: "统计信息"
                 url: "qrc:/UI/qml/view/teaStatView.qml"
                 onTap: ()=>{
-                    console.log("切换页面 " + url);
+                    console.log("[INFO] 切换页面 " + url);
                     nav_view.push(url);
                 }
                 icon: FluentIcons.People

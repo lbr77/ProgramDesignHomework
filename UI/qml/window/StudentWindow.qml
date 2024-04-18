@@ -63,11 +63,8 @@ FluWindow{
         sequence: "Ctrl+S"
         onActivated: {
             backend.Save();
+            showInfo("保存成功")
         }
-    }
-    Component.onCompleted: {
-        console.log("Loading Completed");
-        // Do sth
     }
     FluNavigationView{
         id: nav_view
@@ -85,7 +82,7 @@ FluWindow{
                 title: "校内成绩" // 表格+ Line Chart
                 url: "qrc:/UI/qml/view/stuGradeView.qml"
                 onTap: ()=>{
-                    console.log("切换页面 " + url);
+                    console.log("[INFO] 切换页面 " + url);
                     nav_view.push(url);
                 }
                 icon: FluentIcons.PhoneBook
@@ -97,7 +94,7 @@ FluWindow{
                     title: "论文"
                     url: "qrc:/UI/qml/view/stuQualityView.qml"
                     onTap: ()=>{
-                        console.log("切换页面 " + url);
+                        console.log("[INFO] 切换页面 " + url);
                         nav_view.push(url);
                     }
                 }
@@ -105,7 +102,7 @@ FluWindow{
                     title: "项目"
                     url: "qrc:/UI/qml/view/stuProjectView.qml"
                     onTap: ()=>{
-                        console.log("切换页面 " + url);
+                        console.log("[INFO] 切换页面 " + url);
                         nav_view.push(url);
                     }
                 }
@@ -113,7 +110,7 @@ FluWindow{
                     title: "竞赛奖项"
                     url: "qrc:/UI/qml/view/stuCompetitionView.qml"
                     onTap: ()=>{
-                        console.log("切换页面 " + url);
+                        console.log("[INFO] 切换页面 " + url);
                         nav_view.push(url);
                     }
 
@@ -123,7 +120,7 @@ FluWindow{
                 title: "个人信息"
                 url: "qrc:/UI/qml/view/stuInfoView.qml"
                 onTap: ()=>{
-                    console.log("切换页面 " + url);
+                    console.log("[INFO] 切换页面 " + url);
                     nav_view.push(url);
                 }
                 icon: FluentIcons.People
