@@ -77,7 +77,7 @@ public:
     Q_INVOKABLE int getRank4Stu();//DONE(Used) //获取排名
     Q_INVOKABLE QJsonArray getArticleList4Stu(); //(素质) 论文
     Q_INVOKABLE QJsonArray getProjectList4Stu(); //(素质) 项目
-    Q_INVOKABLE QJsonArray getcompetitionList4Stu(); //(素质) 竞赛
+    Q_INVOKABLE QJsonArray getCompetitionList4Stu(); //(素质) 竞赛
     //Teacher related
     Q_INVOKABLE QJsonArray getStudentList(); //DONE(Used)
     Q_INVOKABLE QString findStudentIdByName(QString name); //DONE(Used)
@@ -99,7 +99,7 @@ public:
     Q_INVOKABLE QJsonObject addCourseRec4Admin(QString teacherid,QString title,int term,double power);//DONE
     Q_INVOKABLE QJsonArray getArticleList4Admin(); //(素质) 论文
     Q_INVOKABLE QJsonArray getProjectList4Admin(); //(素质) 项目
-    Q_INVOKABLE QJsonArray getcompetitionList4Admin(); //(素质) 竞赛
+    Q_INVOKABLE QJsonArray getCompetitionList4Admin(); //(素质) 竞赛
 };
 
 #endif //COURSEWORK_BACKEND_H

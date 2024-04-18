@@ -9,6 +9,9 @@
         <file>qml/window/AdminWindow.qml</file>
         <file>qml/view/stuGradeView.qml</file>
         <file>qml/view/stuInfoView.qml</file>
+        <file>qml/view/stuProjectView.qml</file>
+        <file>qml/view/stuInfoView.qml</file>
+        <file>qml/view/stuArticleView.qml</file>
         <file>qml/view/teaCourseView.qml</file>
         <file>qml/view/teaGradeView.qml</file>
         <file>qml/view/teaStatView.qml</file>
@@ -16,6 +19,9 @@
         <file>qml/view/adminCourseView.qml</file>
         <file>qml/view/adminScoreView.qml</file>
         <file>qml/view/adminUserView.qml</file>
+        <file>qml/view/adminArticleView.qml</file>
+        <file>qml/view/adminCompetitionView.qml</file>
+        <file>qml/view/adminProjectView.qml</file>
         <file>res/logo.ico</file>
     </qresource>
 </RCC>

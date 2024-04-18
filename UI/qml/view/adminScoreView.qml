@@ -16,7 +16,7 @@ FluContentPage{
     property bool seletedAll: true
 
     Component.onCompleted: ()=>{
-        // dataSource = backend.getScoreList4Tea();
+        courseList = backend.getCourseList4Admin();
         dataSource = backend.getScoreList4Admin();
         for(var i = 0;i<dataSource.length;i++){
             dataSource[i].checkbox = table_view.customItem(com_checbox,{"checked":false})

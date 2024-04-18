@@ -832,7 +832,7 @@ QJsonArray backendManager::getProjectList4Stu() {
     return arr;
 }
 
-QJsonArray backendManager::getcompetitionList4Stu() {
+QJsonArray backendManager::getCompetitionList4Stu() {
     if(this->permission <= 1)return QJsonArray(); // No permission
     QJsonArray arr;
     for(int i=0;i<sizeList(this->competitionlist);i++){
@@ -906,7 +906,7 @@ QJsonArray backendManager::getProjectList4Admin() {
     return arr;
 }
 
-QJsonArray backendManager::getcompetitionList4Admin() {
+QJsonArray backendManager::getCompetitionList4Admin() {
     if(this->permission <= 2)return QJsonArray(); // No permission
     QJsonArray arr;
     for(int i=0;i<sizeList(this->competitionlist);i++){
@@ -1008,5 +1008,4 @@ double backendManager::getBonusGPA4Stu(QString userid) {
     }
     return GPA;
 }
-
 

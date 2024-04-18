@@ -7,7 +7,7 @@ import FluentUI 1.0
 FluContentPage{
 
     id:root
-    title: "所售课程"
+    title: "所授课程"
     signal checkBoxChanged
 
     property var dataSource : []
@@ -301,7 +301,7 @@ FluContentPage{
             },
             {
                 title: "及格率",
-                dataIndex: "percent",
+                dataIndex: "percentage",
                 width: 100,
                 minimumWidth: 100,
                 maximumWidth: 100
@@ -316,7 +316,7 @@ FluContentPage{
             title: data.title,
             average: data.average,
             teacherid: data.teacherid,
-            percentage: data.percent
+            percentage: data.percentage
         };
     }
     function loadData(){
