@@ -30,20 +30,39 @@ struct Score{
 //----------------额外信息-----------------
 struct Article{ //论文信息
     int aid;
+    char *studentid;
     char *title;
-    char *author;//with all authors in one string split with .
+    int nauthor;
+    char **author;
     char *journal;
-    char *releasetime;//yyyyMM
+    char *time;//yyyy-MM-dd
+    int paperNum;
+    int volIssue;
+    char *pageRange;
     char *level;
     double score;//加分
 };
 struct Project{ //项目信息
     int pid;
-    char *members; //二维
+    char *studentid;
+    char *name;
+    char *leader;
+    int nmember;
+    char **member;
+    char *starttime;//yyyy-MM-dd
+    char *endtime;//yyyy-MM-dd
+    double score;//加分
 };
-struct Competetion{ //竞赛信息
+struct Competition{ //竞赛信息
     int cid;
-
+    char *studentid;
+    char *name;
+    char *level;
+    char *organizer;
+    int nstudent;
+    char **student;
+    char *time;//yyyy-MM-dd
+    double score;//加分
 };
 
 #endif //COURSETEST_STRUCT_H

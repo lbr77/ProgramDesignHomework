@@ -15,10 +15,7 @@ FluContentPage{
         user = backend.getUserInfo();
         gpa = backend.getTotalGPA4Stu();
         history = backend.getGPAByTerm4Stu();
-        // added = backend.getAddedGPA4Stu(); //TODO
-        console.log(JSON.stringify(user))
-        console.log(JSON.stringify(history))
-        console.log(gpa)
+        added = backend.getBonusGPA4Stu();
     }
     RowLayout{
         anchors.topMargin: 5

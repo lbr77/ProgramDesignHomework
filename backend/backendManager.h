@@ -46,7 +46,7 @@ private:
     int aidx;
     LinkedList *projectlist{};
     int pidx;
-    LinkedList *competetionlist{};
+    LinkedList *competitionlist{};
     int coidx;
     void initExtra();
     void saveExtra();
@@ -70,10 +70,14 @@ public:
     //Student related
     Q_INVOKABLE QJsonArray getScoreList4Stu();//DONE(Used) //学生成绩列表
     Q_INVOKABLE double getTotalGPA4Stu();//DONE(Used) //计算总GPA
+    Q_INVOKABLE double getTotalGPA4Stu(QString userid);
     Q_INVOKABLE QJsonArray getGPAByTerm4Stu();//DONE(Used)  //计算每学期GPA (Line Chart)
-//    Q_INVOKABLE QJsonArray getArticleList4Stu(); //(素质) 论文
-//    Q_INVOKABLE QJsonArray getProjectList4Stu(); //(素质) 项目
-//    Q_INVOKABLE QJsonArray getCompetetionList4Stu(); //(素质) 竞赛
+    Q_INVOKABLE double getBonusGPA4Stu();
+    Q_INVOKABLE double getBonusGPA4Stu(QString userid);
+    Q_INVOKABLE int getRank4Stu();//DONE(Used) //获取排名
+    Q_INVOKABLE QJsonArray getArticleList4Stu(); //(素质) 论文
+    Q_INVOKABLE QJsonArray getProjectList4Stu(); //(素质) 项目
+    Q_INVOKABLE QJsonArray getcompetitionList4Stu(); //(素质) 竞赛
     //Teacher related
     Q_INVOKABLE QJsonArray getStudentList(); //DONE(Used)
     Q_INVOKABLE QString findStudentIdByName(QString name); //DONE(Used)
@@ -90,6 +94,12 @@ public:
     Q_INVOKABLE QJsonArray getUserList4Admin();
     Q_INVOKABLE int deleteUserRec4Admin(QString userid);//DONE
     Q_INVOKABLE QJsonObject modifyUserRec4Admin(QString userid,QString name,QString password,int permission,int major);//DONE
+    Q_INVOKABLE QJsonArray getCourseList4Admin();
+    Q_INVOKABLE QJsonArray getTeacherList4Admin();
+    Q_INVOKABLE QJsonObject addCourseRec4Admin(QString teacherid,QString title,int term,double power);//DONE
+    Q_INVOKABLE QJsonArray getArticleList4Admin(); //(素质) 论文
+    Q_INVOKABLE QJsonArray getProjectList4Admin(); //(素质) 项目
+    Q_INVOKABLE QJsonArray getcompetitionList4Admin(); //(素质) 竞赛
 };
 
 #endif //COURSEWORK_BACKEND_H

@@ -86,7 +86,7 @@ FluContentPage{
             }
 
             FluButton{
-                text: qsTr("Search")
+                text: "搜索"
                 anchors{
                     bottom: parent.bottom
                     right: parent.right
@@ -329,7 +329,6 @@ FluContentPage{
     }
     function loadData(){
         let datas = backend.getScoreList4Stu();
-
         const dataSource = []
         for(let data of datas){
             dataSource.push(makeData(data))

@@ -423,7 +423,7 @@ def generate_research_outcome(current_student_name):
     memberNames = "、".join(members)
     startDate = generate_random_date(2020, 2022)
     endDate = generate_random_date(2023, 2024)
-    return f"0 {projectID} {projectName} {mentorName} {memberCount} {memberNames} {startDate} {endDate} {bonusPoints:.2f}"
+    return f"0 {projectName},{mentorName},{memberCount},{memberNames},{startDate},{endDate},{bonusPoints:.2f}"
 
 # 生成学术论文成果信息
 def generate_academic_paper(current_student_name):
@@ -495,8 +495,6 @@ def generate_user():
         sid.append(student_id)
     usr_file.close()
     return sid,tid
-def generate_score(sid,tid):
-    pass
 # 主函数
 def main():
     student,teacher = generate_user()

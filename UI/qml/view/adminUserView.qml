@@ -207,34 +207,12 @@ FluContentPage{
             }
         }
     }
-    Component{
-        id:com_combobox
-        FluComboBox {
-            anchors.fill: parent
-            focus: true
-            editText: display
-            editable: true
-            model: ListModel {
-                ListElement { text: "100" }
-                ListElement { text: "300" }
-                ListElement { text: "500" }
-                ListElement { text: "1000" }
-            }
-            Component.onCompleted: {
-                currentIndex=["100","300","500","1000"].findIndex((element) => element === display)
-                selectAll()
-            }
-            onCommit: {
-                editTextChaged(editText)
-                tableView.closeEditor()
-            }
-        }
-    }
+
     Component{
         id:com_column_sort_score
         Item{
             FluText{
-                text: "成绩"
+                text: "权限"
                 anchors.centerIn: parent
             }
             ColumnLayout{
@@ -401,7 +379,7 @@ FluContentPage{
         }
     }
     FluContentDialog{
-        id: add_usr
+        id: add_crs
         title: "新增用户信息"
         property var usrname
         property var usrid
@@ -430,7 +408,7 @@ FluContentPage{
                             id: txt_id
                             Layout.fillWidth: true
                             onTextChanged: {
-                                add_usr.usrid = text
+                                add_crs.usrid = text
                             }
                         }
                     }
@@ -443,7 +421,7 @@ FluContentPage{
                             id: txt_name
                             Layout.fillWidth: true
                             onTextChanged: {
-                                add_usr.usrname = text
+                                add_crs.usrname = text
                             }
                         }
                     }
@@ -456,7 +434,7 @@ FluContentPage{
                             id: txt_pwd
                             Layout.fillWidth: true
                             onTextChanged: {
-                                add_usr.usrpass = text
+                                add_crs.usrpass = text
                             }
                         }
                     }
@@ -472,21 +450,21 @@ FluContentPage{
                             FluMenuItem{
                                 text: "学生"
                                 onClicked: {
-                                    add_usr.usrperm = 1
+                                    add_crs.usrperm = 1
                                     perm_btn.text = "学生"
                                 }
                             }
                             FluMenuItem{
                                 text: "教师"
                                 onClicked: {
-                                    add_usr.usrperm = 2
+                                    add_crs.usrperm = 2
                                     perm_btn.text = "教师"
                                 }
                             }
                             FluMenuItem {
                                 text: "管理员"
                                 onClicked: {
-                                    add_usr.usrperm = 3
+                                    add_crs.usrperm = 3
                                     perm_btn.text = "管理员"
                                 }
                             }
@@ -502,7 +480,7 @@ FluContentPage{
                             text: "0"
                             Layout.fillWidth: true
                             onTextChanged: {
-                                add_usr.usrmajor = parseInt(text)
+                                add_crs.usrmajor = parseInt(text)
                             }
                         }
                     }
@@ -543,7 +521,7 @@ FluContentPage{
             FluButton{
                 text: "添加用户"
                 onClicked: ()=>{
-                    add_usr.open()
+                    add_crs.open()
                 }
             }
             FluButton{
@@ -592,7 +570,6 @@ FluContentPage{
             {
                 title: table_view.customItem(com_column_sort_score,{sort:0}),
                 dataIndex: 'permission',
-                editDelegate:com_combobox,
                 width:100,
                 minimumWidth:100,
                 maximumWidth:100

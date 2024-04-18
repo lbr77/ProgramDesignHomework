@@ -163,7 +163,7 @@ void backendManager::saveScore(){
 }
 
 void backendManager::initExtra(){
-    auto fp = open_file("article.txt","r");
+    auto fp = open_file("extrainfo.txt","r");
     auto alist = makeList();
     auto plist = makeList();
     auto clist = makeList();
@@ -173,45 +173,127 @@ void backendManager::initExtra(){
         if(strcmp(type,"article") == 0){
             auto article = (Article *)malloc(sizeof(Article));
             article->aid = atoi(strtok(NULL,","));
+            this->aidx = max(aidx,article->aid);
+            article->studentid = strtok(NULL,",");
             article->title = strtok(NULL,",");
-            article->author = strtok(NULL,",");
+            article->nauthor = atoi(strtok(NULL,","));
+            article->author = (char **)malloc(sizeof(char *)*article->nauthor);
+            for(int i=0;i<article->nauthor;i++){
+                article->author[i] = strtok(NULL,",");
+            }
             article->journal = strtok(NULL,",");
-            article->releasetime = strtok(NULL,",");
+            article->time = strtok(NULL,",");
+            article->paperNum = atoi(strtok(NULL,","));
+            article->volIssue = atoi(strtok(NULL,","));
+            article->pageRange = strtok(NULL,",");
             article->level = strtok(NULL,",");
             article->score = atof(strtok(NULL,","));
             insertList(alist,article);
-        }else if(strcmp(type,"project") == 0){
+        }
+        else if(strcmp(type,"project") == 0){
             auto project = (Project *)malloc(sizeof(Project));
             project->pid = atoi(strtok(NULL,","));
-            project->members = strtok(NULL,",");
+            this->pidx = max(pidx,project->pid);
+            project->studentid = strtok(NULL,",");
+            project->name = strtok(NULL,",");
+            project->leader = strtok(NULL,",");
+            project->nmember = atoi(strtok(NULL,","));
+            project->member = (char **)malloc(sizeof(char *)*project->nmember);
+            for(int i=0;i<project->nmember;i++){
+                project->member[i] = strtok(NULL,",");
+            }
+            project->starttime = strtok(NULL,",");
+            project->endtime = strtok(NULL,",");
+            project->score = atof(strtok(NULL,","));
             insertList(plist,project);
-        }else if(strcmp(type,"competetion") == 0){
-            auto competetion = (Competetion *)malloc(sizeof(Competetion));
-            competetion->cid = atoi(strtok(NULL,","));
-            insertList(clist,competetion);
+        }
+        else if(strcmp(type,"competition") == 0){
+            auto competition = (Competition *)malloc(sizeof(Competition));
+            competition->cid = atoi(strtok(NULL,","));
+            this->coidx = max(coidx,competition->cid);
+            competition->studentid = strtok(NULL,",");
+            competition->name = strtok(NULL,",");
+            competition->level = strtok(NULL,",");
+            competition->organizer = strtok(NULL,",");
+            competition->nstudent = atoi(strtok(NULL,","));
+            competition->student = (char **)malloc(sizeof(char *)*competition->nstudent);
+            for(int i=0;i<competition->nstudent;i++){
+                competition->student[i] = strtok(NULL,",");
+            }
+            competition->time = strtok(NULL,",");
+            competition->score = atof(strtok(NULL,","));
+            insertList(clist,competition);
         }
     }
     close_file(fp);
     this->articlelist = alist;
     this->projectlist = plist;
-    this->competetionlist = clist;
+    this->competitionlist = clist;
+    qDebug()<<"[DEBUG] Initialize Extra Table: "<<sizeList(alist)<<"articles,"<<sizeList(plist)<<"projects,"<<sizeList(clist)<<"competitions.";
 }
 void backendManager::saveExtra(){
-    auto fp = open_file("article.txt","w");
+    auto fp = open_file("extrainfo.txt","w");
     for(int i=0;i<sizeList(this->articlelist);i++){
         auto article = (Article *)getListNode(this->articlelist,i);
-        fprintf(fp,"article,%d,%s,%s,%s,%s,%s,%.2lf\n",article->aid,article->title,article->author,article->journal,article->releasetime,article->level,article->score);
+        fprintf(fp,
+                "article,%d,%s,%s,%d",
+                article->aid,
+                article->studentid,
+                article->title,
+                article->nauthor
+        );
+        for(int j=0;j<article->nauthor;j++){
+            fprintf(fp,",%s",article->author[j]);
+        }
+        fprintf(fp,",%s,%s,%d,%d,%s,%s,%.2lf\n",
+                article->journal,
+                article->time,
+                article->paperNum,
+                article->volIssue,
+                article->pageRange,
+                article->level,
+                article->score
+        );
     }
     for(int i=0;i<sizeList(this->projectlist);i++){
         auto project = (Project *)getListNode(this->projectlist,i);
-        fprintf(fp,"project,%d,%s\n",project->pid,project->members);
+        fprintf(fp,
+                "project,%d,%s,%s,%s,%d",
+                project->pid,
+                project->studentid,
+                project->name,
+                project->leader,
+                project->nmember
+        );
+        for(int j=0;j<project->nmember;j++){
+            fprintf(fp,",%s",project->member[j]);
+        }
+        fprintf(fp,",%s,%s,%.2lf\n",
+                project->starttime,
+                project->endtime,
+                project->score
+        );
     }
-    for(int i=0;i<sizeList(this->competetionlist);i++){
-        auto competetion = (Competetion *)getListNode(this->competetionlist,i);
-        fprintf(fp,"competetion,%d\n",competetion->cid);
+    for(int i=0;i<sizeList(this->competitionlist);i++){
+        auto competition = (Competition *)getListNode(this->competitionlist, i);
+        fprintf(fp,
+                "competition,%d,%s,%s,%s,%s,%d",
+                competition->cid,
+                competition->studentid,
+                competition->name,
+                competition->level,
+                competition->organizer,
+                competition->nstudent
+        );
+        for(int j=0;j<competition->nstudent;j++){
+            fprintf(fp,",%s",competition->student[j]);
+        }
+        fprintf(fp,",%s,%.2lf\n",
+                competition->time,
+                competition->score
+        );
     }
     close_file(fp);
-
 }
 //---------------------------------END   Init & Save LinkedList-----------------------------------
 
@@ -238,10 +320,10 @@ backendManager::~backendManager() {
 //---------------------------------START Account Related -----------------------------------------
 int backendManager::login(QString username, QString password){
     if(this->username != ""){
-        qDebug()<<"[INFO] User"<<this->username<<"already login.";
+        qDebug()<<"[INFO] User"<<this->username<<"already logged in.";
         return 0;
     }
-    qDebug()<<"[INFO] User"<<username<<"attempts login.";
+    qDebug()<<"[INFO] User"<<username<<"attempt to login.";
     auto usrptr = toNewConstChar(username);
     auto *user = this->getUser(usrptr);
     if(user != NULL) {
@@ -304,6 +386,8 @@ QJsonObject backendManager::getUserInfo(){
 //---------------------------------END   Account Related -----------------------------------------
 // Get user info by userid, as json
 QJsonObject backendManager::getUserInfo(QString userid){
+    if(this->permission <= 0)return QJsonObject(); // No permission
+    if(userid == "")return QJsonObject(); // Invalid input
     auto usrptr = toNewConstChar(userid);
     auto user = this->getUser(usrptr);
     QJsonObject obj;
@@ -320,6 +404,8 @@ QJsonObject backendManager::getUserInfo(QString userid){
 }
 // Get course info by courseid, as json
 QJsonObject backendManager::getCourseInfo(int courseid){
+    if(this->permission <= 0)return QJsonObject(); // No permission
+    if(courseid <= 0 || courseid > this->cidx)return QJsonObject(); // Invalid courseid
     auto course = this->getCourse(courseid);
     QJsonObject obj;
     if(course != NULL){
@@ -367,6 +453,7 @@ QJsonArray backendManager::getScoreList4Admin(){
         obj.insert("scoreid",score->scoreid);
         obj.insert("score",score->score);
         auto course = this->getCourse(score->courseid);
+        if(course == NULL)continue;
         obj.insert("title",course->title);
         obj.insert("term",course->term);
         obj.insert("power",course->power);
@@ -375,6 +462,7 @@ QJsonArray backendManager::getScoreList4Admin(){
         obj.insert("major",user->major);
         arr.append(obj);
     }
+    qDebug()<<"23";
     return arr;
 }
 void backendManager::Save(){
@@ -385,6 +473,7 @@ void backendManager::Save(){
 }
 int backendManager::addUserRec4Admin(QString userid, QString name, QString password, int permission, int major) {
     if(this->permission <= 2)return -1; // No permission
+    if(userid == "" || name == "" || password == "" || permission < 0 || permission > 3 || major < 0 || major > 100)return -1; // Invalid input
     qDebug()<<"[INFO] User"<<this->username<<"add user record:"<<userid<<name<<password<<permission<<major;
     auto *user = (User *)malloc(sizeof(User));
     user->userid = const_cast<char*>(toNewConstChar(userid));
@@ -430,6 +519,7 @@ QJsonArray backendManager::getGPAByTerm4Stu() {
 //Write
 QJsonObject backendManager::addScoreRec4Tea(QString courseid, QString studentid, int score){
     if(this->permission <= 1)return QJsonObject(); // No permission
+    if(courseid == "" || studentid == "" || score < 0 || score > 100)return QJsonObject(); // Invalid input
     qDebug()<<"[INFO] User"<<this->username<<"add score record:"<<courseid<<studentid<<score;
     auto *scoreit = (Score *)malloc(sizeof(Score));
     scoreit->scoreid = ++this->scoreidx;
@@ -447,6 +537,7 @@ QJsonObject backendManager::addScoreRec4Tea(QString courseid, QString studentid,
 }
 int backendManager::deleteScoreRec4Tea(QString sid){
     if(this->permission <= 1)return -1; // No permission
+    if(sid == "")return -1; // Invalid input
     qDebug()<<"[INFO] User"<<this->username<<"delete score record:"<<sid;
     for(int i=0;i<sizeList(this->scorelist);i++){
         auto score = (Score *)getListNode(this->scorelist,i);
@@ -477,6 +568,7 @@ QJsonArray backendManager::getUserList4Admin(){
 }
 QJsonArray backendManager::getStudentScoreList4Tea(int courseid){
     if(this->permission <= 1)return QJsonArray(); // No permission
+    if(courseid <= 0 || courseid > this->cidx)return QJsonArray(); // Invalid courseid
     QJsonArray arr;
     auto cid = courseid;
     for(int i=0;i<sizeList(this->scorelist);i++){
@@ -498,6 +590,7 @@ QJsonArray backendManager::getStudentScoreList4Tea(int courseid){
 //WriteW
 void backendManager::changeUserInfo(QString name, int major,QString userid) {
     if(this->permission <= 0)return;
+    if(userid == "")return;
     qDebug()<<"[INFO] User"<<this->username<<"change user info:"<<name<<major<<userid;
     auto user = this->getUser(std::move(userid).toStdString().c_str());
     if(this->permission == 1){
@@ -534,6 +627,7 @@ QJsonArray backendManager::getCourseList4Tea(){
 }
 double backendManager::getCoursePercentage4Tea(int courseid) {
     if(this->permission <= 1)return 0; // No permission
+    if(courseid <= 0 || courseid > this->cidx)return 0; // Invalid courseid
     int total = 0;
     int count = 0;
     auto scorelist = this->getStudentScoreList4Tea(courseid);
@@ -548,6 +642,7 @@ double backendManager::getCoursePercentage4Tea(int courseid) {
 }
 double backendManager::getScoreAverage(int courseid) {
     if(this->permission <= 1)return 0; // No permission
+    if(courseid <= 0 || courseid > this->cidx)return 0; // Invalid courseid
     double total = 0;
     int count = 0;
     auto scorelist = this->getStudentScoreList4Tea(courseid);
@@ -562,6 +657,7 @@ double backendManager::getScoreAverage(int courseid) {
 
 int backendManager::deleteUserRec4Admin(QString userid) {
     if(this->permission <= 2)return -1; // No permission
+    if(userid == "")return -1; // Invalid input
     qDebug()<<"[INFO] User"<<this->username<<"delete user record";
     this->deleteUser(toNewConstChar(userid));
     return 0;
@@ -569,6 +665,7 @@ int backendManager::deleteUserRec4Admin(QString userid) {
 
 void backendManager::changeScoreRec4Tea(QString sid, int score) {
     if(this->permission <= 1)return; // No permission
+    if(score < 0 || score > 100)return; // Invalid input
     qDebug()<<"[INFO] User"<<this->username<<"change score record:"<<sid<<score;
     for(int i=0;i<sizeList(this->scorelist);i++){
         auto scoreit = (Score *)getListNode(this->scorelist,i);
@@ -597,6 +694,7 @@ QJsonArray backendManager::getStudentList() {
 
 QString backendManager::findStudentIdByName(QString name) {
     if(this->permission <= 1)return ""; // No permission
+    if(name == "")return ""; // Invalid input
     for(int i=0;i<sizeList(this->userList);i++){
         auto user = (User *)getListNode(this->userList,i);
         if(strcmp(user->name,std::move(name).toStdString().c_str()) == 0){
@@ -608,6 +706,7 @@ QString backendManager::findStudentIdByName(QString name) {
 
 QJsonObject backendManager::modifyUserRec4Admin(QString userid, QString name, QString password, int permission, int major) {
     if(this->permission <= 2)return QJsonObject(); // No permission
+    if(userid == "" || name == "" || password == "" || permission < 0 || permission > 3 || major < 0)return QJsonObject(); // Invalid input
     qDebug()<<"[INFO] User"<<this->username<<"modify user record:"<<userid<<name<<password<<permission<<major;
     auto *user = this->getUser(toNewConstChar(userid));
     user->name = const_cast<char*>(toNewConstChar(name));
@@ -622,3 +721,292 @@ QJsonObject backendManager::modifyUserRec4Admin(QString userid, QString name, QS
     obj.insert("password",user->password);
     return obj;
 }
+
+QJsonArray backendManager::getCourseList4Admin() {
+    if(this->permission <= 2)return QJsonArray(); // No permission
+    QJsonArray arr;
+    for(int i=0;i<sizeList(this->courselist);i++){
+        auto course = (Course *)getListNode(this->courselist,i);
+        QJsonObject obj;
+        obj.insert("courseid",course->courseid);
+        obj.insert("teacherid",course->teacherid);
+        auto user = this->getUser(course->teacherid);
+        if(user == NULL)continue;
+        obj.insert("teachername",user->name);
+        obj.insert("title",course->title);
+        obj.insert("term",course->term);
+        obj.insert("power",course->power);
+        arr.append(obj);
+    }
+    return arr;
+}
+
+QJsonArray backendManager::getTeacherList4Admin() {
+    if(this->permission <= 2)return QJsonArray(); // No permission
+    QJsonArray arr;
+    for(int i=0;i<sizeList(this->userList);i++){
+        auto user = (User *)getListNode(this->userList,i);
+        if(user->permission == 2){
+            QJsonObject obj;
+            obj.insert("userid",user->userid);
+            obj.insert("name",user->name);
+            arr.append(obj);
+        }
+    }
+    return arr;
+}
+
+QJsonObject backendManager::addCourseRec4Admin(QString teacherid, QString title, int term, double power) {
+    if(this->permission <= 2)return QJsonObject(); // No permission
+    if(teacherid == "" || title == "" || term < 0 || power < 0)return QJsonObject(); // Invalid input
+    qDebug()<<"[INFO] User"<<this->username<<"add course record:"<<teacherid<<title<<term<<power;
+    auto *course = (Course *)malloc(sizeof(Course));
+    course->courseid = ++this->cidx;
+    course->teacherid = const_cast<char*>(toNewConstChar(teacherid));
+    course->title = const_cast<char*>(toNewConstChar(title));
+    course->term = term;
+    course->power = power;
+    insertList(this->courselist,course);
+    QJsonObject obj;
+    obj.insert("courseid",course->courseid);
+    obj.insert("teacherid",course->teacherid);
+    auto user = this->getUser(course->teacherid);
+    if(user == NULL)return QJsonObject();
+    obj.insert("teachername",user->name);
+    obj.insert("title",course->title);
+    obj.insert("term",course->term);
+    obj.insert("power",course->power);
+    return obj;
+}
+
+QJsonArray backendManager::getArticleList4Stu() {
+    if(this->permission <= 1)return QJsonArray(); // No permission
+    QJsonArray arr;
+    for(int i=0;i<sizeList(this->articlelist);i++){
+        auto article = (Article *)getListNode(this->articlelist,i);
+        if(strcmp(article->studentid,std::move(this->username).toStdString().c_str()) == 0){
+            QJsonObject obj;
+            obj.insert("aid",article->aid);
+            obj.insert("studentid",article->studentid);
+            obj.insert("title",article->title);
+            QJsonArray author;
+            for(int j=0;j<article->nauthor;j++){
+                author.append(article->author[j]);
+            }
+            obj.insert("author",author);
+            obj.insert("journal",article->journal);
+            obj.insert("time",article->time);
+            obj.insert("paperNum",article->paperNum);
+            obj.insert("volIssue",article->volIssue);
+            obj.insert("pageRange",article->pageRange);
+            obj.insert("level",article->level);
+            obj.insert("score",article->score);
+            arr.append(obj);
+        }
+    }
+    return arr;
+}
+
+QJsonArray backendManager::getProjectList4Stu() {
+    if(this->permission <= 1)return QJsonArray(); // No permission
+    QJsonArray arr;
+    for(int i=0;i<sizeList(this->projectlist);i++){
+        auto project = (Project *)getListNode(this->projectlist,i);
+        if(strcmp(project->studentid,std::move(this->username).toStdString().c_str()) == 0){
+            QJsonObject obj;
+            obj.insert("pid",project->pid);
+            obj.insert("studentid",project->studentid);
+            obj.insert("name",project->name);
+            obj.insert("leader",project->leader);
+            QJsonArray member;
+            for(int j=0;j<project->nmember;j++){
+                member.append(project->member[j]);
+            }
+            obj.insert("member",member);
+            obj.insert("starttime",project->starttime);
+            obj.insert("endtime",project->endtime);
+            obj.insert("score",project->score);
+            arr.append(obj);
+        }
+    }
+    return arr;
+}
+
+QJsonArray backendManager::getcompetitionList4Stu() {
+    if(this->permission <= 1)return QJsonArray(); // No permission
+    QJsonArray arr;
+    for(int i=0;i<sizeList(this->competitionlist);i++){
+        auto competition = (Competition *)getListNode(this->competitionlist,i);
+        if(strcmp(competition->studentid,std::move(this->username).toStdString().c_str()) == 0){
+            QJsonObject obj;
+            obj.insert("cid",competition->cid);
+            obj.insert("studentid",competition->studentid);
+            obj.insert("name",competition->name);
+            obj.insert("level",competition->level);
+            obj.insert("organizer",competition->organizer);
+            QJsonArray student;
+            for(int j=0;j<competition->nstudent;j++){
+                student.append(competition->student[j]);
+            }
+            obj.insert("student",student);
+            obj.insert("time",competition->time);
+            obj.insert("score",competition->score);
+            arr.append(obj);
+        }
+    }
+    return arr;
+}
+
+QJsonArray backendManager::getArticleList4Admin() {
+    if(this->permission <= 2)return QJsonArray(); // No permission
+    QJsonArray arr;
+    for(int i=0;i<sizeList(this->articlelist);i++){
+        auto article = (Article *)getListNode(this->articlelist,i);
+        QJsonObject obj;
+        obj.insert("aid",article->aid);
+        obj.insert("studentid",article->studentid);
+        obj.insert("title",article->title);
+        QJsonArray author;
+        for(int j=0;j<article->nauthor;j++){
+            author.append(article->author[j]);
+        }
+        obj.insert("author",author);
+        obj.insert("journal",article->journal);
+        obj.insert("time",article->time);
+        obj.insert("paperNum",article->paperNum);
+        obj.insert("volIssue",article->volIssue);
+        obj.insert("pageRange",article->pageRange);
+        obj.insert("level",article->level);
+        obj.insert("score",article->score);
+        arr.append(obj);
+    }
+    return arr;
+}
+
+QJsonArray backendManager::getProjectList4Admin() {
+    if(this->permission <= 2)return QJsonArray(); // No permission
+    QJsonArray arr;
+    for(int i=0;i<sizeList(this->projectlist);i++){
+        auto project = (Project *)getListNode(this->projectlist,i);
+        QJsonObject obj;
+        obj.insert("pid",project->pid);
+        obj.insert("studentid",project->studentid);
+        obj.insert("name",project->name);
+        obj.insert("leader",project->leader);
+        QJsonArray member;
+        for(int j=0;j<project->nmember;j++){
+            member.append(project->member[j]);
+        }
+        obj.insert("member",member);
+        obj.insert("starttime",project->starttime);
+        obj.insert("endtime",project->endtime);
+        obj.insert("score",project->score);
+        arr.append(obj);
+    }
+    return arr;
+}
+
+QJsonArray backendManager::getcompetitionList4Admin() {
+    if(this->permission <= 2)return QJsonArray(); // No permission
+    QJsonArray arr;
+    for(int i=0;i<sizeList(this->competitionlist);i++){
+        auto competition = (Competition *)getListNode(this->competitionlist,i);
+        QJsonObject obj;
+        obj.insert("cid",competition->cid);
+        obj.insert("studentid",competition->studentid);
+        obj.insert("name",competition->name);
+        obj.insert("level",competition->level);
+        obj.insert("organizer",competition->organizer);
+        QJsonArray student;
+        for(int j=0;j<competition->nstudent;j++){
+            student.append(competition->student[j]);
+        }
+        obj.insert("student",student);
+        obj.insert("time",competition->time);
+        obj.insert("score",competition->score);
+        arr.append(obj);
+    }
+    return arr;
+}
+
+double backendManager::getBonusGPA4Stu() {
+    if(this->permission <= 1)return 0; // No permission
+    double GPA = 0.0;
+    for(int i=0;i<sizeList(this->articlelist);i++){
+        auto article = (Article *)getListNode(this->articlelist,i);
+        if(strcmp(article->studentid,std::move(this->username).toStdString().c_str()) == 0){
+            GPA += article->score;
+        }
+    }
+    for(int i=0;i<sizeList(this->projectlist);i++){
+        auto project = (Project *)getListNode(this->projectlist,i);
+        if(strcmp(project->studentid,std::move(this->username).toStdString().c_str()) == 0){
+            GPA += project->score;
+        }
+    }
+    for(int i=0;i<sizeList(this->competitionlist);i++){
+        auto competition = (Competition *)getListNode(this->competitionlist,i);
+        if(strcmp(competition->studentid,std::move(this->username).toStdString().c_str()) == 0){
+            GPA += competition->score;
+        }
+    }
+    return GPA;
+}
+
+int backendManager::getRank4Stu() {
+    if(this->permission <= 1)return 0; // No permission
+    auto GPA = this->getTotalGPA4Stu() + this->getBonusGPA4Stu();
+    int rank = 1;
+    for(int i=0;i<sizeList(this->userList);i++){
+        auto user = (User *)getListNode(this->userList,i);
+        if(user->permission == 1){
+            auto userGPA = this->getTotalGPA4Stu(user->userid) + this->getBonusGPA4Stu(user->userid);
+            if(userGPA > GPA){
+                rank++;
+            }
+        }
+    }
+    return rank;
+}
+
+double backendManager::getTotalGPA4Stu(QString userid) {
+    if(this->permission <= 1)return 0; // No permission
+    auto scores = this->getScoreList4Stu();
+    double GPA = 0.0;
+    double totalPower = 0.0;
+    for(auto scoree:scores){
+        auto score = scoree.toObject();
+        if(strcmp(score["userid"].toString().toStdString().c_str(),std::move(userid).toStdString().c_str()) == 0){
+            GPA += calcGPA(score["score"].toInt())*score["power"].toDouble();
+            totalPower += score["power"].toDouble();
+        }
+    }
+    if(totalPower == 0)return 0;
+    return GPA/totalPower;
+}
+
+double backendManager::getBonusGPA4Stu(QString userid) {
+    if(this->permission <= 1)return 0; // No permission
+    double GPA = 0.0;
+    for(int i=0;i<sizeList(this->articlelist);i++){
+        auto article = (Article *)getListNode(this->articlelist,i);
+        if(strcmp(article->studentid,std::move(userid).toStdString().c_str()) == 0){
+            GPA += article->score;
+        }
+    }
+    for(int i=0;i<sizeList(this->projectlist);i++){
+        auto project = (Project *)getListNode(this->projectlist,i);
+        if(strcmp(project->studentid,std::move(userid).toStdString().c_str()) == 0){
+            GPA += project->score;
+        }
+    }
+    for(int i=0;i<sizeList(this->competitionlist);i++){
+        auto competition = (Competition *)getListNode(this->competitionlist,i);
+        if(strcmp(competition->studentid,std::move(userid).toStdString().c_str()) == 0){
+            GPA += competition->score;
+        }
+    }
+    return GPA;
+}
+
+
