@@ -8,7 +8,7 @@ FluContentPage{
 
     id:root
     title: "创新项目列表"
-        signal checkBoxChanged
+    signal checkBoxChanged
 
     property var dataSource : []
     property int sortType: 0
@@ -20,7 +20,7 @@ FluContentPage{
         })
     }
     Component.onCompleted: ()=>{
-        console.log("[INFO] Loading score");
+        console.log("[INFO] Loading project");
         loadData()
         console.log("[INFO] Loaded");
     }
@@ -57,71 +57,6 @@ FluContentPage{
                     }
                     return lage<rage
                 });
-        }
-    }
-    FluMenu{
-        id:pop_filter
-        width: 200
-        height: 89
-
-        contentItem: Item{
-
-            onVisibleChanged: {
-                if(visible){
-                    name_filter_text.text = root.nameKeyword
-                    name_filter_text.cursorPosition = name_filter_text.text.length
-                    name_filter_text.forceActiveFocus()
-                }
-            }
-
-            FluTextBox{
-                id:name_filter_text
-                anchors{
-                    left: parent.left
-                    right: parent.right
-                    top: parent.top
-                    leftMargin: 10
-                    rightMargin: 10
-                    topMargin: 10
-                }
-                iconSource: FluentIcons.Search
-            }
-
-            FluButton{
-                text: qsTr("Search")
-                anchors{
-                    bottom: parent.bottom
-                    right: parent.right
-                    bottomMargin: 10
-                    rightMargin: 10
-                }
-                onClicked: {
-                    root.nameKeyword = name_filter_text.text
-                    pop_filter.close()
-                }
-            }
-
-        }
-        function showPopup(){
-            table_view.closeEditor()
-            pop_filter.popup()
-        }
-
-    }
-    Component{
-        id:com_checbox
-        Item{
-            FluCheckBox{
-                anchors.centerIn: parent
-                checked: true === options.checked
-                enableAnimation: false
-                clickListener: function(){
-                    var obj = table_view.getRow(row)
-                    obj.checkbox = table_view.customItem(com_checbox,{checked:!options.checked})
-                    table_view.setRow(row,obj)
-                    checkBoxChanged()
-                }
-            }
         }
     }
     Component{

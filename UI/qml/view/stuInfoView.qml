@@ -11,11 +11,15 @@ FluContentPage{
     property var history : []
     property double gpa : 0 // 绩点
     property double added : 0 // 加分
+    property int rank : 0 // 排名
     Component.onCompleted: {
         user = backend.getUserInfo();
         gpa = backend.getTotalGPA4Stu();
         history = backend.getGPAByTerm4Stu();
         added = backend.getBonusGPA4Stu();
+        rank = backend.getRank4Stu();
+        let r = backend.canApplyGraduate4Stu();
+        console.log(r)
     }
     RowLayout{
         anchors.topMargin: 5
@@ -88,6 +92,14 @@ FluContentPage{
                         text: "GPA：" + `${gpa.toFixed(2)} + ${added.toFixed(2)} = ${(gpa + added).toFixed(2)}`
 
                         font.pixelSize: 15
+                    }
+                    FluText{
+                        text: "排名：" + rank
+                        font.pixelSize: 15
+                    }
+                    FluText{
+                        font.pixelSize: 15
+                        text: "可否保研：（预测）" + ["不可能","可能"][Number(backend.canApplyGraduate4Stu())]
                     }
                     FluTextButton{
                         text: "修改信息"

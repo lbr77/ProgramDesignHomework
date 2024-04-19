@@ -12,6 +12,7 @@
         <file>qml/view/stuProjectView.qml</file>
         <file>qml/view/stuInfoView.qml</file>
         <file>qml/view/stuArticleView.qml</file>
+        <file>qml/view/stuCompetitionView.qml</file>
         <file>qml/view/teaCourseView.qml</file>
         <file>qml/view/teaGradeView.qml</file>
         <file>qml/view/teaStatView.qml</file>

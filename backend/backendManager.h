@@ -73,6 +73,7 @@ public:
     Q_INVOKABLE double getTotalGPA4Stu(QString userid);
     Q_INVOKABLE QJsonArray getGPAByTerm4Stu();//DONE(Used)  //计算每学期GPA (Line Chart)
     Q_INVOKABLE double getBonusGPA4Stu();
+    Q_INVOKABLE bool canApplyGraduate4Stu();//DONE(Used) //判断是否可以申请研究生
     Q_INVOKABLE double getBonusGPA4Stu(QString userid);
     Q_INVOKABLE int getRank4Stu();//DONE(Used) //获取排名
     Q_INVOKABLE QJsonArray getArticleList4Stu(); //(素质) 论文
@@ -98,8 +99,18 @@ public:
     Q_INVOKABLE QJsonArray getTeacherList4Admin();
     Q_INVOKABLE QJsonObject addCourseRec4Admin(QString teacherid,QString title,int term,double power);//DONE
     Q_INVOKABLE QJsonArray getArticleList4Admin(); //(素质) 论文
+    Q_INVOKABLE QJsonObject addArticleRec4Admin(QString stuname,QString title,QString author,QString journal,QString time,int paperNum,int volIssue,QString pageRange,QString level,double score);
+    Q_INVOKABLE QJsonObject changeArticleRec4Admin(int aid,QString stuname,QString title,QString author,QString journal,QString time,int paperNum,int volIssue,QString pageRange,QString level,double score);
     Q_INVOKABLE QJsonArray getProjectList4Admin(); //(素质) 项目
+    Q_INVOKABLE QJsonObject changeProjectRec4Admin(int pid,QString stuname,QString name,QString leader,QString member,QString starttime,QString endtime,double score);
+    Q_INVOKABLE QJsonObject addProjectRec4Admin(QString stuname,QString name,QString leader,QString member,QString starttime,QString endtime,double score);
     Q_INVOKABLE QJsonArray getCompetitionList4Admin(); //(素质) 竞赛
+    Q_INVOKABLE QJsonObject changeCompetitionRec4Admin(int cid,QString stuname,QString name,QString level,QString organizer,QString student,QString time,double score);
+    Q_INVOKABLE QJsonObject addCompetitonRec4Admin(QString stuname,QString name,QString level,QString organizer,QString student,QString time,double score);
+    Q_INVOKABLE void deleteCompetitonRec4Admin(int cid);
+    Q_INVOKABLE void deleteProjectRec4Admin(int pid);
+    Q_INVOKABLE void deleteArticleRec4Admin(int aid);
+
 };
 
 #endif //COURSEWORK_BACKEND_H

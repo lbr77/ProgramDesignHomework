@@ -8,7 +8,7 @@ FluContentPage{
 
     id:root
     title: "竞赛获奖列表"
-        signal checkBoxChanged
+    signal checkBoxChanged
 
     property var dataSource : []
     property int sortType: 0
@@ -23,15 +23,6 @@ FluContentPage{
         console.log("[INFO] Loading score");
         loadData()
         console.log("[INFO] Loaded");
-    }
-    onCheckBoxChanged: ()=>{
-        for(var i =0;i< table_view.rows ;i++){
-            if(false === table_view.getRow(i).checkbox.options.checked){
-                root.seletedAll = false
-                return
-            }
-        }
-        root.seletedAll = true
     }
     onSortTypeChanged: ()=>{
         table_view.closeEditor()
@@ -133,8 +124,7 @@ FluContentPage{
                     text: "删除"
                     onClicked: ()=>{
                         table_view.closeEditor()
-                        console.log(JSON.stringify(table_view.getRow(row)))
-                        backend.deleteUserRec4Admin(table_view.getRow(row).userid)
+                        backend.deleteCompetitonRec4Admin(table_view.getRow(row).cid)
                         table_view.removeRow(row)
                         showInfo("删除成功")
                     }
@@ -142,7 +132,7 @@ FluContentPage{
                 FluFilledButton{
                     text: "编辑"
                     onClicked: ()=>{
-                        modify.usrid = table_view.getRow(row).userid
+                        modify.cid = table_view.getRow(row).cid
                         modify.open()
                     }
                 }
@@ -153,7 +143,7 @@ FluContentPage{
         id:com_column_filter_name
         Item{
             FluText{
-                text: "标题"
+                text: "奖项"
                 anchors.centerIn: parent
             }
             FluIconButton{
@@ -207,97 +197,16 @@ FluContentPage{
             }
         }
     }
-    Component{
-        id:com_combobox
-        FluComboBox {
-            anchors.fill: parent
-            focus: true
-            editText: display
-            editable: true
-            model: ListModel {
-                ListElement { text: "100" }
-                ListElement { text: "300" }
-                ListElement { text: "500" }
-                ListElement { text: "1000" }
-            }
-            Component.onCompleted: {
-                currentIndex=["100","300","500","1000"].findIndex((element) => element === display)
-                selectAll()
-            }
-            onCommit: {
-                editTextChaged(editText)
-                tableView.closeEditor()
-            }
-        }
-    }
-    Component{
-        id:com_column_sort_score
-        Item{
-            FluText{
-                text: "成绩"
-                anchors.centerIn: parent
-            }
-            ColumnLayout{
-                spacing: 0
-                anchors{
-                    right: parent.right
-                    verticalCenter: parent.verticalCenter
-                    rightMargin: 4
-                }
-                FluIconButton{
-                    Layout.preferredWidth: 20
-                    Layout.preferredHeight: 15
-                    iconSize: 12
-                    verticalPadding:0
-                    horizontalPadding:0
-                    iconSource: FluentIcons.ChevronUp
-                    iconColor: {
-                        if(1 === root.sortType){
-                            return FluTheme.primaryColor
-                        }
-                        return FluTheme.dark ?  Qt.rgba(1,1,1,1) : Qt.rgba(0,0,0,1)
-                    }
-                    onClicked: {
-                        if(root.sortType === 1){
-                            root.sortType = 0
-                            return
-                        }
-                        root.sortType = 1
-                    }
-                }
-                FluIconButton{
-                    Layout.preferredWidth: 20
-                    Layout.preferredHeight: 15
-                    iconSize: 12
-                    verticalPadding:0
-                    horizontalPadding:0
-                    iconSource: FluentIcons.ChevronDown
-                    iconColor: {
-                        if(2 === root.sortType){
-                            return FluTheme.primaryColor
-                        }
-                        return FluTheme.dark ?  Qt.rgba(1,1,1,1) : Qt.rgba(0,0,0,1)
-                    }
-                    onClicked: {
-                        if(root.sortType === 2){
-                            root.sortType = 0
-                            return
-                        }
-                        root.sortType = 2
-                    }
-                }
-            }
-        }
-    }
-
     FluContentDialog{
         id: modify
-        title: "修改课程信息"
-        property var usrname
-        property var usrid
-        property var usrpass
-        property var usrperm
-        property var usrmajor
+        title: "修改获奖信息"
+        property var cid
+        property var stuname
+        property var name
+        property var level
+        property var organizer
+        property var student
+        property var score
 
         negativeText: "取消"
         positiveText: "确定"
@@ -306,79 +215,86 @@ FluContentPage{
         contentDelegate: Component{
             Item{
                 implicitWidth: parent.width
-                implicitHeight: 200
+                implicitHeight: 300
                 anchors.fill: parent
                 ColumnLayout{
                     anchors.centerIn: parent
                     spacing: 10
                     Row{
                         FluText{
-                            text: "授课教师"
+                            text: "学生姓名"
                             Layout.alignment: Qt.AlignVCenter
                         }
-                        FluDropDownButton{
-                            id: teacher_btn
-                            text: "教师"
-                            Layout.alignment: Qt.AlignVCenter
-                            Repeater{
-                                model: backend.getTeacherList4Admin()
-                                delegate: FluMenuItem{
-                                    text: modelData.name
-                                    onClicked: {
-                                        modify.usrid = modelData.userid
-                                        teacher_btn.text = modelData.name
-                                    }
-                                }
+                        FluTextBox{
+                            id: txt_stuname
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                modify.stuname = text
                             }
-
                         }
                     }
                     Row{
                         FluText{
-                            text: "课程名字："
+                            text: "奖项名字"
                             Layout.alignment: Qt.AlignVCenter
                         }
                         FluTextBox{
                             id: txt_name
                             Layout.fillWidth: true
                             onTextChanged: {
-                                modify.coursename = text
+                                modify.name = text
                             }
                         }
                     }
                     Row{
                         FluText{
-                            text: "学期："
-                            Layout.alignment: Qt.AlignVCenter
-                        }
-                        FluDropDownButton{
-                            id: term_btn
-                            text: "学期"
-                            Layout.alignment: Qt.AlignVCenter
-                            Repeater{
-                                model: [1,2,3,4,5,6,7,8]
-                                delegate: FluMenuItem{
-                                    text: modelData
-                                    onClicked: {
-                                        modify.courseterm = modelData
-                                        term_btn.text = modelData
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-                    Row{
-                        FluText{
-                            text: "学分："
+                            text: "奖项等级"
                             Layout.alignment: Qt.AlignVCenter
                         }
                         FluTextBox{
-                            id: txt_major
-                            text: "0"
+                            id: txt_level
                             Layout.fillWidth: true
                             onTextChanged: {
-                                modify.usrmajor = parseFloat(text)
+                                modify.level = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "组织者："
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_organizer
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                modify.organizer = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "其他参与者："
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_student
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                modify.student = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "加分："
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_score
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                modify.score = parseFloat(text)
                             }
                         }
                     }
@@ -387,20 +303,22 @@ FluContentPage{
         }
 
         onPositiveClicked: {
-            let r = backend.modifyCourseRec4Admin(modify.usrid,modify.coursename,modify.courseterm,modify.usrmajor)
+            let r = backend.changeCompetitionRec4Admin(modify.cid,modify.stuname,modify.name,modify.level,modify.organizer,modify.student,modify.score)
             loadData()
             showInfo("修改成功")
         }
     }
     FluContentDialog{
         id: add_usr
-        title: "新增课程信息"
-        property var teaname
-        property var coursename
-        property var courseterm
-        property var usrperm
-        property var usrmajor
-        property var usrid
+        title: "新增获奖信息"
+        property var cid
+        property var stuname
+        property var name
+        property var level
+        property var organizer
+        property var student : ""
+        property var time : ""
+        property var score
         negativeText: "取消"
         positiveText: "确定"
         buttonFlags: FluContentDialogType.NegativeButton | FluContentDialogType.PositiveButton
@@ -408,80 +326,99 @@ FluContentPage{
         contentDelegate: Component{
             Item{
                 implicitWidth: parent.width
-                implicitHeight: 200
+                implicitHeight: 300
                 anchors.fill: parent
                 ColumnLayout{
                     anchors.centerIn: parent
                     spacing: 10
                     Row{
                         FluText{
-                            text: "授课教师"
+                            text: "学生姓名"
                             Layout.alignment: Qt.AlignVCenter
                         }
-                        FluDropDownButton{
-                            id: teacher_btn
-                            text: "教师"
-                            Layout.alignment: Qt.AlignVCenter
-                            Repeater{
-                                model: backend.getTeacherList4Admin()
-                                delegate: FluMenuItem{
-                                    text: modelData.name
-                                    onClicked: {
-                                        console.log(JSON.stringify(modelData))
-                                        add_usr.usrid = modelData.userid
-                                        teacher_btn.text = modelData.name
-                                    }
-                                }
+                        FluTextBox{
+                            id: txt_stuname
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                add_usr.stuname = text
                             }
-
                         }
                     }
                     Row{
                         FluText{
-                            text: "课程名字："
+                            text: "奖项名字"
                             Layout.alignment: Qt.AlignVCenter
                         }
                         FluTextBox{
                             id: txt_name
                             Layout.fillWidth: true
                             onTextChanged: {
-                                add_usr.coursename = text
+                                add_usr.name = text
                             }
                         }
                     }
                     Row{
                         FluText{
-                            text: "学期："
-                            Layout.alignment: Qt.AlignVCenter
-                        }
-                        FluDropDownButton{
-                            id: term_btn
-                            text: "学期"
-                            Layout.alignment: Qt.AlignVCenter
-                            Repeater{
-                                model: [1,2,3,4,5,6,7,8]
-                                delegate: FluMenuItem{
-                                    text: modelData
-                                    onClicked: {
-                                        add_usr.courseterm = modelData
-                                        term_btn.text = modelData
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-                    Row{
-                        FluText{
-                            text: "学分："
+                            text: "奖项等级"
                             Layout.alignment: Qt.AlignVCenter
                         }
                         FluTextBox{
-                            id: txt_major
-                            text: "0"
+                            id: txt_level
                             Layout.fillWidth: true
                             onTextChanged: {
-                                add_usr.usrmajor = parseFloat(text)
+                                add_usr.level = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "组织者："
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_organizer
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                add_usr.organizer = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "其他参与者："
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_student
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                add_usr.student = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "时间："
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_time
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                add_usr.time = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "加分："
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_score
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                add_usr.score = parseFloat(text)
                             }
                         }
                     }
@@ -490,9 +427,10 @@ FluContentPage{
         }
 
         onPositiveClicked: {
-            let r = backend.addCourseRec4Admin(add_usr.usrid,add_usr.coursename,add_usr.courseterm,add_usr.usrmajor)
-            table_view.dataSource.push(root.makeData(r));
-            modify.close()
+            console.log(stuname,name,level,organizer,student,score)
+            let r = backend.addCompetitonRec4Admin(add_usr.stuname,add_usr.name,add_usr.level,add_usr.organizer,add_usr.student,add_usr.time,add_usr.score)
+            loadData()
+            add_usr.close()
             showInfo("添加成功")
         }
     }
@@ -514,13 +452,13 @@ FluContentPage{
                 verticalCenter: parent.verticalCenter
             }
             FluButton{
-                text: "导入课程"
+                text: "导入奖项"
                 onClicked: ()=>{
                     showError("未实现")
                 }
             }
             FluButton{
-                text: "添加课程"
+                text: "添加奖项"
                 onClicked: ()=>{
                     add_usr.open()
                 }
@@ -548,36 +486,50 @@ FluContentPage{
         }
         columnSource:[
             {
-                title: table_view.customItem(com_column_checbox,{checked:false}),
-                dataIndex: 'checkbox',
-                width:100,
+                title: "比赛名称",
+                dataIndex: "name",
+                width: 200,
+                minimumWidth:200,
+                maximumWidth:200
+            },
+            {
+                title: "奖项等级",
+                dataIndex: 'level',
+                width: 200,
+                minimumWidth:200,
+                maximumWidth:200
+            },
+            {
+                title: "选手名字",
+                dataIndex: 'studentname',
+                width: 200,
+                minimumWidth:200,
+                maximumWidth:200
+            },
+            {
+                title: "组织者",
+                dataIndex: 'organizer',
+                width: 100,
                 minimumWidth:100,
                 maximumWidth:100
             },
             {
-                title: "教师",
-                dataIndex: "teacher",
+                title: "其他参与者",
+                dataIndex: 'student',
                 width: 200,
                 minimumWidth:200,
                 maximumWidth:200
             },
             {
-                title: table_view.customItem(com_column_filter_name,{title:"标题"}),
-                dataIndex: 'title',
+                title: "时间",
+                dataIndex: 'time',
                 width: 200,
                 minimumWidth:200,
                 maximumWidth:200
             },
             {
-                title: "学期",
-                dataIndex: 'term',
-                width: 200,
-                minimumWidth:200,
-                maximumWidth:200
-            },
-            {
-                title: "学分",
-                dataIndex: 'power',
+                title: "加分",
+                dataIndex: 'score',
                 width: 100,
                 minimumWidth:100,
                 maximumWidth:100
@@ -593,16 +545,19 @@ FluContentPage{
     }
     function makeData(data){
         return {
-            checkbox: table_view.customItem(com_checbox,{checked: false}),
-            teacher: data.teachername,
-            title: data.title,
-            term: data.term,
-            power: data.power,
-            action: table_view.customItem(com_action,{})
+            cid: data.cid,
+            name: data.name,
+            level: data.level,
+            studentname: data.studentname,
+            organizer: data.organizer,
+            student: JSON.stringify(data.student),
+            time: data.time,
+            score: data.score,
+            action: table_view.customItem(com_action)
         };
     }
     function loadData(){
-        let datas = backend.getCourseList4Admin();
+        let datas = backend.getCompetitionList4Admin();
         const dataSource = []
         for(let data of datas){
             dataSource.push(makeData(data));

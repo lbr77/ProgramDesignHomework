@@ -9,6 +9,7 @@ void test_student(){
     qDebug()<<bMgr.getGPAByTerm4Stu();
     qDebug()<< bMgr.getScoreList4Stu();
     bMgr.changeUserInfo("李博",55,"55230422");
+    bMgr.changeUserInfo("李博睿",55,"55230422");
     bMgr.logout();
 }
 void test_teacher(){
@@ -25,14 +26,11 @@ void test_teacher(){
 }
 void test_admin(){
     bMgr.login("admin","1");
-    qDebug()<< bMgr.getUserList4Admin();
-    qDebug()<< bMgr.addUserRec4Admin("1","1","1",1,1);
-    qDebug()<< bMgr.deleteUserRec4Admin("1");
-    qDebug()<< bMgr.getScoreList4Admin();
+//    qDebug()<<
     bMgr.logout();
 }
 int main(){
 //    test_teacher();
-    test_student();
-//    test_admin();
+//    test_student();
+    test_admin();
 }

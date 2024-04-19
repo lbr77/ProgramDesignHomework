@@ -180,6 +180,12 @@ void backendManager::initExtra(){
             article->author = (char **)malloc(sizeof(char *)*article->nauthor);
             for(int i=0;i<article->nauthor;i++){
                 article->author[i] = strtok(NULL,",");
+                if(strcmp(article->author[i],"(null)")==0){
+                    article->author[i] = (char *)malloc(1);
+                    article->nauthor = 0;
+                    strcpy(article->author[i],"\0");
+                    break;
+                }
             }
             article->journal = strtok(NULL,",");
             article->time = strtok(NULL,",");
@@ -201,6 +207,12 @@ void backendManager::initExtra(){
             project->member = (char **)malloc(sizeof(char *)*project->nmember);
             for(int i=0;i<project->nmember;i++){
                 project->member[i] = strtok(NULL,",");
+                if(strcmp(project->member[i],"(null)")==0) {
+                    project->member[i] = (char *) malloc(1);
+                    project->nmember = 0;
+                    strcpy(project->member[i], "\0");
+                    break;
+                }
             }
             project->starttime = strtok(NULL,",");
             project->endtime = strtok(NULL,",");
@@ -219,6 +231,12 @@ void backendManager::initExtra(){
             competition->student = (char **)malloc(sizeof(char *)*competition->nstudent);
             for(int i=0;i<competition->nstudent;i++){
                 competition->student[i] = strtok(NULL,",");
+                if(strcmp(competition->student[i],"(null)")==0){
+                    competition->student[i] = (char *)malloc(1);
+                    competition->nstudent = 0;
+                    strcpy(competition->student[i],"\0");
+                    break;
+                }
             }
             competition->time = strtok(NULL,",");
             competition->score = atof(strtok(NULL,","));
@@ -833,7 +851,7 @@ QJsonArray backendManager::getProjectList4Stu() {
 }
 
 QJsonArray backendManager::getCompetitionList4Stu() {
-    if(this->permission <= 1)return QJsonArray(); // No permission
+    if(this->permission <= 0)return QJsonArray(); // No permission
     QJsonArray arr;
     for(int i=0;i<sizeList(this->competitionlist);i++){
         auto competition = (Competition *)getListNode(this->competitionlist,i);
@@ -841,6 +859,9 @@ QJsonArray backendManager::getCompetitionList4Stu() {
             QJsonObject obj;
             obj.insert("cid",competition->cid);
             obj.insert("studentid",competition->studentid);
+            auto stu = this->getUser(competition->studentid);
+            if(stu == NULL)continue;
+            obj.insert("studentname",stu->name);
             obj.insert("name",competition->name);
             obj.insert("level",competition->level);
             obj.insert("organizer",competition->organizer);
@@ -914,6 +935,9 @@ QJsonArray backendManager::getCompetitionList4Admin() {
         QJsonObject obj;
         obj.insert("cid",competition->cid);
         obj.insert("studentid",competition->studentid);
+        auto user = this->getUser(competition->studentid);
+        if(user == NULL)continue;
+        obj.insert("studentname",user->name);
         obj.insert("name",competition->name);
         obj.insert("level",competition->level);
         obj.insert("organizer",competition->organizer);
@@ -930,7 +954,8 @@ QJsonArray backendManager::getCompetitionList4Admin() {
 }
 
 double backendManager::getBonusGPA4Stu() {
-    if(this->permission <= 1)return 0; // No permission
+    if(this->permission <= 0)return 0; // No permission
+    qDebug()<<"[INFO] User"<<this->username<<"get bonus GPA.";
     double GPA = 0.0;
     for(int i=0;i<sizeList(this->articlelist);i++){
         auto article = (Article *)getListNode(this->articlelist,i);
@@ -954,7 +979,7 @@ double backendManager::getBonusGPA4Stu() {
 }
 
 int backendManager::getRank4Stu() {
-    if(this->permission <= 1)return 0; // No permission
+    if(this->permission <= 0)return 0; // No permission
     auto GPA = this->getTotalGPA4Stu() + this->getBonusGPA4Stu();
     int rank = 1;
     for(int i=0;i<sizeList(this->userList);i++){
@@ -1009,3 +1034,329 @@ double backendManager::getBonusGPA4Stu(QString userid) {
     return GPA;
 }
 
+QJsonObject
+backendManager::changeCompetitionRec4Admin(int cid, QString stuname, QString name, QString level, QString organizer, QString student, QString time, double score) {
+    if(this->permission <= 2)return QJsonObject(); // No permission
+    auto studentid = this->findStudentIdByName(stuname);
+    if(studentid == "" || name == "" || level == "" || organizer == ""  || score < 0)return QJsonObject(); // Invalid input
+    qDebug()<<"[INFO] User"<<this->username<<"change competition record:"<<cid<<studentid<<name<<level<<organizer<<student<<time<<score;
+    for(int i=0;i<sizeList(this->competitionlist);i++){
+        auto competition = (Competition *)getListNode(this->competitionlist,i);
+        if(competition->cid == cid){
+            competition->studentid = const_cast<char*>(toNewConstChar(studentid));
+            competition->name = const_cast<char*>(toNewConstChar(name));
+            competition->level = const_cast<char*>(toNewConstChar(level));
+            competition->organizer = const_cast<char*>(toNewConstChar(organizer));
+            auto t = student.split(",");
+
+            competition->nstudent = t.size();
+            competition->student = (char **)malloc(sizeof(char *)*competition->nstudent);
+            for(int j=0;j<t.size();j++){
+                competition->student[j] = const_cast<char*>(toNewConstChar(t[j]));
+            }
+            competition->time = const_cast<char*>(toNewConstChar(time));
+            competition->score = score;
+            QJsonObject obj;
+            obj.insert("cid",competition->cid);
+            obj.insert("studentid",competition->studentid);
+            obj.insert("name",competition->name);
+            obj.insert("level",competition->level);
+            obj.insert("organizer",competition->organizer);
+            QJsonArray studentarr;
+            for(int j=0;j<competition->nstudent;j++){
+                studentarr.append(competition->student[j]);
+            }
+            obj.insert("student",studentarr);
+            obj.insert("time",competition->time);
+            obj.insert("score",competition->score);
+            return obj;
+        }
+    }
+}
+
+QJsonObject
+backendManager::addCompetitonRec4Admin(QString stuname, QString name, QString level, QString organizer,
+                                       QString student, QString time, double score) {
+    if(this->permission <= 2)return QJsonObject(); // No permission
+    auto studentid = this->findStudentIdByName(stuname);
+    if(studentid == "" || name == "" || level == "" || organizer == ""  || score < 0)return QJsonObject(); // Invalid input
+    qDebug()<<"[INFO] User"<<this->username<<"add competition record:"<<studentid<<name<<level<<organizer<<student<<time<<score;
+    auto *competition = (Competition *)malloc(sizeof(Competition));
+    competition->cid = ++this->cidx;
+    competition->studentid = const_cast<char*>(toNewConstChar(studentid));
+    competition->name = const_cast<char*>(toNewConstChar(name));
+    competition->level = const_cast<char*>(toNewConstChar(level));
+    competition->organizer = const_cast<char*>(toNewConstChar(organizer));
+    auto t = student.split(",");
+    if(student == ""){
+        competition->nstudent = 0;
+        competition->student = (char **)malloc(sizeof(char *));
+        competition->student[0] = const_cast<char*>(toNewConstChar(""));
+    }
+    competition->nstudent = t.size();
+    competition->student = (char **)malloc(sizeof(char *)*t.size());
+    auto studentptr = const_cast<char*>(toNewConstChar(student));
+    for(int j=0;j<t.size();j++){
+        competition->student[j] = strtok(studentptr,",");
+    }
+    competition->time = const_cast<char*>(toNewConstChar(time));
+    competition->score = score;
+    insertList(this->competitionlist,competition);
+    QJsonObject obj;
+    obj.insert("cid",competition->cid);
+    obj.insert("studentid",competition->studentid);
+    obj.insert("name",competition->name);
+    obj.insert("level",competition->level);
+    obj.insert("organizer",competition->organizer);
+    obj.insert("nstudent",competition->nstudent);
+    QJsonArray studentarr;
+    for(int j=0;j<competition->nstudent;j++){
+        studentarr.append(competition->student[j]);
+    }
+    obj.insert("student",studentarr);
+    obj.insert("time",competition->time);
+    obj.insert("score",competition->score);
+    return obj;
+}
+
+bool backendManager::canApplyGraduate4Stu() {
+    return this->getTotalGPA4Stu() + this->getBonusGPA4Stu() >= 3.6;
+}
+
+QJsonObject
+backendManager::addProjectRec4Admin(QString stuname, QString name, QString leader, QString member, QString starttime,
+                                    QString endtime, double score) {
+    if(this->permission <= 2)return QJsonObject(); // No permission
+    auto studentid = this->findStudentIdByName(stuname);
+    if(studentid == "" || name == "" || leader == "" || member == "" || score < 0)return QJsonObject(); // Invalid input
+    qDebug()<<"[INFO] User"<<this->username<<"add project record:"<<studentid<<name<<leader<<member<<starttime<<endtime<<score;
+    auto *project = (Project *)malloc(sizeof(Project));
+    project->pid = ++this->pidx;
+    project->studentid = const_cast<char*>(toNewConstChar(studentid));
+    project->name = const_cast<char*>(toNewConstChar(name));
+    project->leader = const_cast<char*>(toNewConstChar(leader));
+    auto t = member.split(",");
+    if(member == ""){
+        project->nmember = 0;
+        project->member = (char **)malloc(sizeof(char *));
+        project->member[0] = const_cast<char*>(toNewConstChar(""));
+    }
+    project->nmember = t.size();
+
+    project->member = (char **)malloc(sizeof(char *)*t.size());
+    auto memberptr = const_cast<char*>(toNewConstChar(member));
+    for(int j=0;j<t.size();j++){
+        project->member[j] = strtok(memberptr,",");
+    }
+    project->starttime = const_cast<char*>(toNewConstChar(starttime));
+    project->endtime = const_cast<char*>(toNewConstChar(endtime));
+    project->score = score;
+    insertList(this->projectlist,project);
+    QJsonObject obj;
+    obj.insert("pid",project->pid);
+    obj.insert("studentid",project->studentid);
+    obj.insert("student",this->getUser(studentid.toStdString().c_str())->name);
+    obj.insert("name",project->name);
+    obj.insert("leader",project->leader);
+    obj.insert("nmember",project->nmember);
+    QJsonArray memberarr;
+    for(int j=0;j<project->nmember;j++){
+        memberarr.append(project->member[j]);
+    }
+    obj.insert("member",memberarr);
+    obj.insert("starttime",project->starttime);
+    obj.insert("endtime",project->endtime);
+    obj.insert("score",project->score);
+    return obj;
+}
+
+void backendManager::deleteCompetitonRec4Admin(int cid) {
+    if(this->permission <= 2)return; // No permission
+    qDebug()<<"[INFO] User"<<this->username<<"delete competition record:"<<cid;
+    for(int i=0;i<sizeList(this->competitionlist);i++){
+        auto competition = (Competition *)getListNode(this->competitionlist,i);
+        if(competition->cid == cid){
+            deleteList(this->competitionlist,competition);
+            return;
+        }
+    }
+}
+
+void backendManager::deleteProjectRec4Admin(int pid) {
+    if(this->permission <= 2)return; // No permission
+    qDebug()<<"[INFO] User"<<this->username<<"delete project record:"<<pid;
+    for(int i=0;i<sizeList(this->projectlist);i++){
+        auto project = (Project *)getListNode(this->projectlist,i);
+        if(project->pid == pid){
+            deleteList(this->projectlist,project);
+            return;
+        }
+    }
+}
+
+void backendManager::deleteArticleRec4Admin(int aid) {
+    if(this->permission <= 2)return; // No permission
+    qDebug()<<"[INFO] User"<<this->username<<"delete article record:"<<aid;
+    for(int i=0;i<sizeList(this->articlelist);i++){
+        auto article = (Article *)getListNode(this->articlelist,i);
+        if(article->aid == aid){
+            deleteList(this->articlelist,article);
+            return;
+        }
+    }
+}
+
+QJsonObject
+backendManager::addArticleRec4Admin(QString stuname, QString title, QString author, QString journal, QString time,
+                                    int paperNum, int volIssue, QString pageRange, QString level, double score) {
+    if(this->permission <= 2)return QJsonObject(); // No permission
+    auto studentid = this->findStudentIdByName(stuname);
+    if(studentid == "" || title == "" || author == "" || journal == "" || time == "" || paperNum < 0 || volIssue < 0 || score < 0)return QJsonObject(); // Invalid input
+    qDebug()<<"[INFO] User"<<this->username<<"add article record:"<<studentid<<title<<author<<journal<<time<<paperNum<<volIssue<<pageRange<<level<<score;
+    auto *article = (Article *)malloc(sizeof(Article));
+    article->aid = ++this->aidx;
+    article->studentid = const_cast<char*>(toNewConstChar(studentid));
+    article->title = const_cast<char*>(toNewConstChar(title));
+    auto t = author.split(",");
+    if(author == ""){
+        article->nauthor = 0;
+        article->author = (char **)malloc(sizeof(char *));
+        article->author[0] = const_cast<char*>(toNewConstChar(""));
+    }
+    article->nauthor = t.size();
+    article->author = (char **)malloc(sizeof(char *)*t.size());
+    auto authorptr = const_cast<char*>(toNewConstChar(author));
+    for(int j=0;j<t.size();j++){
+        article->author[j] = strtok(authorptr,",");
+    }
+    article->journal = const_cast<char*>(toNewConstChar(journal));
+    article->time = const_cast<char*>(toNewConstChar(time));
+    article->paperNum = paperNum;
+    article->volIssue = volIssue;
+    article->pageRange = const_cast<char*>(toNewConstChar(pageRange));
+    article->level = const_cast<char*>(toNewConstChar(level));
+    article->score = score;
+    insertList(this->articlelist,article);
+    QJsonObject obj;
+    obj.insert("aid",article->aid);
+    obj.insert("studentid",article->studentid);
+    obj.insert("student",this->getUser(studentid.toStdString().c_str())->name);
+    obj.insert("title",article->title);
+    obj.insert("nauthor",article->nauthor);
+    QJsonArray authorarr;
+    for(int j=0;j<article->nauthor;j++){
+        authorarr.append(article->author[j]);
+    }
+    obj.insert("author",authorarr);
+    obj.insert("journal",article->journal);
+    obj.insert("time",article->time);
+    obj.insert("paperNum",article->paperNum);
+    obj.insert("volIssue",article->volIssue);
+    obj.insert("pageRange",article->pageRange);
+    obj.insert("level",article->level);
+    obj.insert("score",article->score);
+    return obj;
+}
+
+QJsonObject
+backendManager::changeArticleRec4Admin(int aid, QString stuname, QString title, QString author, QString journal,
+                                       QString time, int paperNum, int volIssue, QString pageRange, QString level,
+                                       double score) {
+    if(this->permission <= 2)return QJsonObject(); // No permission
+    auto studentid = this->findStudentIdByName(stuname);
+    if(studentid == "" || title == "" || author == "" || journal == "" || time == "" || paperNum < 0 || volIssue < 0 || score < 0)return QJsonObject(); // Invalid input
+    qDebug()<<"[INFO] User"<<this->username<<"change article record:"<<aid<<studentid<<title<<author<<journal<<time<<paperNum<<volIssue<<pageRange<<level<<score;
+    for(int i=0;i<sizeList(this->articlelist);i++){
+        auto article = (Article *)getListNode(this->articlelist,i);
+        if(article->aid == aid){
+            article->studentid = const_cast<char*>(toNewConstChar(studentid));
+            article->title = const_cast<char*>(toNewConstChar(title));
+            auto t = author.split(",");
+            if(author == ""){
+                article->nauthor = 0;
+                article->author = (char **)malloc(sizeof(char *));
+                article->author[0] = const_cast<char*>(toNewConstChar(""));
+            }
+            article->nauthor = t.size();
+            article->author = (char **)malloc(sizeof(char *)*t.size());
+            auto authorptr = const_cast<char*>(toNewConstChar(author));
+            for(int j=0;j<t.size();j++){
+                article->author[j] = strtok(authorptr,",");
+            }
+            article->journal = const_cast<char*>(toNewConstChar(journal));
+            article->time = const_cast<char*>(toNewConstChar(time));
+            article->paperNum = paperNum;
+            article->volIssue = volIssue;
+            article->pageRange = const_cast<char*>(toNewConstChar(pageRange));
+            article->level = const_cast<char*>(toNewConstChar(level));
+            article->score = score;
+            QJsonObject obj;
+            obj.insert("aid",article->aid);
+            obj.insert("studentid",article->studentid);
+            obj.insert("student",this->getUser(studentid.toStdString().c_str())->name);
+            obj.insert("title",article->title);
+            obj.insert("nauthor",article->nauthor);
+            QJsonArray authorarr;
+            for(int j=0;j<article->nauthor;j++){
+                authorarr.append(article->author[j]);
+            }
+            obj.insert("author",authorarr);
+            obj.insert("journal",article->journal);
+            obj.insert("time",article->time);
+            obj.insert("paperNum",article->paperNum);
+            obj.insert("volIssue",article->volIssue);
+            obj.insert("pageRange",article->pageRange);
+            obj.insert("level",article->level);
+            obj.insert("score",article->score);
+            return obj;
+        }
+    }
+}
+
+QJsonObject
+backendManager::changeProjectRec4Admin(int pid, QString stuname, QString name, QString leader, QString member,
+                                       QString starttime, QString endtime, double score) {
+    if(this->permission <= 2)return QJsonObject(); // No permission
+    auto studentid = this->findStudentIdByName(stuname);
+    if(studentid == "" || name == "" || leader == "" || member == "" || score < 0)return QJsonObject(); // Invalid input
+    qDebug()<<"[INFO] User"<<this->username<<"change project record:"<<pid<<studentid<<name<<leader<<member<<starttime<<endtime<<score;
+    for(int i=0;i<sizeList(this->projectlist);i++){
+        auto project = (Project *)getListNode(this->projectlist,i);
+        if(project->pid == pid){
+            project->studentid = const_cast<char*>(toNewConstChar(studentid));
+            project->name = const_cast<char*>(toNewConstChar(name));
+            project->leader = const_cast<char*>(toNewConstChar(leader));
+            auto t = member.split(",");
+            if(member == ""){
+                project->nmember = 0;
+                project->member = (char **)malloc(sizeof(char *));
+                project->member[0] = const_cast<char*>(toNewConstChar(""));
+            }
+            project->nmember = t.size();
+            project->member = (char **)malloc(sizeof(char *)*t.size());
+            auto memberptr = const_cast<char*>(toNewConstChar(member));
+            for(int j=0;j<t.size();j++){
+                project->member[j] = strtok(memberptr,",");
+            }
+            project->starttime = const_cast<char*>(toNewConstChar(starttime));
+            project->endtime = const_cast<char*>(toNewConstChar(endtime));
+            project->score = score;
+            QJsonObject obj;
+            obj.insert("pid",project->pid);
+            obj.insert("studentid",project->studentid);
+            obj.insert("student",this->getUser(studentid.toStdString().c_str())->name);
+            obj.insert("name",project->name);
+            obj.insert("leader",project->leader);
+            obj.insert("nmember",project->nmember);
+            QJsonArray memberarr;
+            for(int j=0;j<project->nmember;j++){
+                memberarr.append(project->member[j]);
+            }
+            obj.insert("member",memberarr);
+            obj.insert("starttime",project->starttime);
+            obj.insert("endtime",project->endtime);
+            obj.insert("score",project->score);
+            return obj;
+        }
+    }
+}
