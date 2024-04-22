@@ -68,7 +68,7 @@ public:
     Q_INVOKABLE QJsonObject getCourseInfo(int courseid); //DONE(Used)
     Q_INVOKABLE void changeUserInfo(QString name,int major,QString userid); //DONE(Used) //信息改变(包括转专业等)
     //Student related
-    Q_INVOKABLE QJsonArray getScoreList4Stu();//DONE(Used) //学生成绩列表
+    Q_INVOKABLE QJsonArray getScoreList4Stu(QString keyword);//DONE(Used) //学生成绩列表
     Q_INVOKABLE double getTotalGPA4Stu();//DONE(Used) //计算总GPA
     Q_INVOKABLE double getTotalGPA4Stu(QString userid);
     Q_INVOKABLE QJsonArray getGPAByTerm4Stu();//DONE(Used)  //计算每学期GPA (Line Chart)
@@ -76,32 +76,32 @@ public:
     Q_INVOKABLE bool canApplyGraduate4Stu();//DONE(Used) //判断是否可以申请研究生
     Q_INVOKABLE double getBonusGPA4Stu(QString userid);
     Q_INVOKABLE int getRank4Stu();//DONE(Used) //获取排名
-    Q_INVOKABLE QJsonArray getArticleList4Stu(); //(素质) 论文
-    Q_INVOKABLE QJsonArray getProjectList4Stu(); //(素质) 项目
-    Q_INVOKABLE QJsonArray getCompetitionList4Stu(); //(素质) 竞赛
+    Q_INVOKABLE QJsonArray getArticleList4Stu(QString keyword); //(素质) 论文
+    Q_INVOKABLE QJsonArray getProjectList4Stu(QString keyword); //(素质) 项目
+    Q_INVOKABLE QJsonArray getCompetitionList4Stu(QString keyword); //(素质) 竞赛
     //Teacher related
     Q_INVOKABLE QJsonArray getStudentList(); //DONE(Used)
     Q_INVOKABLE QString findStudentIdByName(QString name); //DONE(Used)
     Q_INVOKABLE QJsonObject addScoreRec4Tea(QString courseid, QString studentid, int score); //DONE
-    Q_INVOKABLE QJsonArray getStudentScoreList4Tea(int courseid); //DONE
+    Q_INVOKABLE QJsonArray getStudentScoreList4Tea(int courseid,QString keyword); //DONE
     double getCoursePercentage4Tea(int courseid); //DONE
     Q_INVOKABLE int deleteScoreRec4Tea(QString sid); //DONE
     Q_INVOKABLE void changeScoreRec4Tea(QString sid, int score); //DONE
-    Q_INVOKABLE QJsonArray getCourseList4Tea(); //DONE
+    Q_INVOKABLE QJsonArray getCourseList4Tea(QString keyword); //DONE
     Q_INVOKABLE double getScoreAverage(int courseid); //DONE
     //Admin related
-    Q_INVOKABLE QJsonArray getScoreList4Admin();
+    Q_INVOKABLE QJsonArray getScoreList4Admin(QString keyword); //DONE
     Q_INVOKABLE int addUserRec4Admin(QString userid,QString name,QString password,int permission,int major);//DONE
-    Q_INVOKABLE QJsonArray getUserList4Admin();
+    Q_INVOKABLE QJsonArray getUserList4Admin(QString keyword);
     Q_INVOKABLE int deleteUserRec4Admin(QString userid);//DONE
     Q_INVOKABLE QJsonObject modifyUserRec4Admin(QString userid,QString name,QString password,int permission,int major);//DONE
-    Q_INVOKABLE QJsonArray getCourseList4Admin();
-    Q_INVOKABLE QJsonArray getTeacherList4Admin();
+    Q_INVOKABLE QJsonArray getCourseList4Admin(QString keyword);
+    Q_INVOKABLE QJsonArray getTeacherList4Admin(QString keyword);
     Q_INVOKABLE QJsonObject addCourseRec4Admin(QString teacherid,QString title,int term,double power);//DONE
-    Q_INVOKABLE QJsonArray getArticleList4Admin(); //(素质) 论文
+    Q_INVOKABLE QJsonArray getArticleList4Admin(QString keyword); //(素质) 论文
     Q_INVOKABLE QJsonObject addArticleRec4Admin(QString stuname,QString title,QString author,QString journal,QString time,int paperNum,int volIssue,QString pageRange,QString level,double score);
     Q_INVOKABLE QJsonObject changeArticleRec4Admin(int aid,QString stuname,QString title,QString author,QString journal,QString time,int paperNum,int volIssue,QString pageRange,QString level,double score);
-    Q_INVOKABLE QJsonArray getProjectList4Admin(); //(素质) 项目
+    Q_INVOKABLE QJsonArray getProjectList4Admin(QString keyword); //(素质) 项目
     Q_INVOKABLE QJsonObject changeProjectRec4Admin(int pid,QString stuname,QString name,QString leader,QString member,QString starttime,QString endtime,double score);
     Q_INVOKABLE QJsonObject addProjectRec4Admin(QString stuname,QString name,QString leader,QString member,QString starttime,QString endtime,double score);
     Q_INVOKABLE QJsonArray getCompetitionList4Admin(); //(素质) 竞赛

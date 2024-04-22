@@ -14,15 +14,19 @@ FluContentPage{
     property var courseList: []
     property int sortType: 0
     property bool seletedAll: true
+    property var courseKeyword : ""
+    property var nameKeyword : ""
 
-    Component.onCompleted: ()=>{
-        courseList = backend.getCourseList4Admin();
-        dataSource = backend.getScoreList4Admin();
-        for(var i = 0;i<dataSource.length;i++){
-            dataSource[i].checkbox = table_view.customItem(com_checbox,{"checked":false})
-            dataSource[i].action = table_view.customItem(com_action,{})
-        }
-        table_view.dataSource = root.dataSource
+    onCourseKeywordChanged: {
+        loadData()
+    }
+    
+    onNameKeywordChanged: {
+        loadData()
+    }
+
+    Component.onCompleted: {
+        loadData()
     }
 
     Component{
@@ -319,5 +323,14 @@ FluContentPage{
                 maximumWidth:200
             }
         ]
+    }
+    function loadData(){
+        courseList = backend.getCourseList4Admin(courseKeyword);
+        dataSource = backend.getScoreList4Admin(nameKeyword);
+        for(var i = 0;i<dataSource.length;i++){
+            dataSource[i].checkbox = table_view.customItem(com_checbox,{"checked":false})
+            dataSource[i].action = table_view.customItem(com_action,{})
+        }
+        table_view.dataSource = root.dataSource
     }
 }

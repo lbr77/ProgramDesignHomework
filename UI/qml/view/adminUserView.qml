@@ -15,9 +15,7 @@ FluContentPage{
     property bool seletedAll: false
     property string nameKeyword: ""
     onNameKeywordChanged: ()=>{
-        table_view.filter(function(item){
-            return item.title.includes(nameKeyword);
-        })
+        loadData()
     }
     Component.onCompleted: ()=>{
         console.log("[INFO] Loading score");
@@ -601,7 +599,7 @@ FluContentPage{
         };
     }
     function loadData(){
-        let datas = backend.getUserList4Admin();
+        let datas = backend.getUserList4Admin(nameKeyword);
         const dataSource = []
         for(let data of datas){
             dataSource.push(makeData(data));

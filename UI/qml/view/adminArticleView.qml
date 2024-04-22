@@ -8,31 +8,21 @@ FluContentPage{
 
     id:root
     title: "论文列表"
-        signal checkBoxChanged
+    signal checkBoxChanged
 
     property var dataSource : []
     property int sortType: 0
     property bool seletedAll: false
     property string nameKeyword: ""
     onNameKeywordChanged: ()=>{
-        table_view.filter(function(item){
-            return item.title.includes(nameKeyword);
-        })
+        loadData()
     }
     Component.onCompleted: ()=>{
         console.log("[INFO] Loading score");
         loadData()
         console.log("[INFO] Loaded");
     }
-    onCheckBoxChanged: ()=>{
-        for(var i =0;i< table_view.rows ;i++){
-            if(false === table_view.getRow(i).checkbox.options.checked){
-                root.seletedAll = false
-                return
-            }
-        }
-        root.seletedAll = true
-    }
+
     onSortTypeChanged: ()=>{
         table_view.closeEditor()
         if(sortType === 0){
@@ -292,7 +282,7 @@ FluContentPage{
 
     FluContentDialog{
         id: modify
-        title: "修改课程信息"
+        title: "修改论文信息"
         property var usrname
         property var usrid
         property var usrpass
@@ -321,7 +311,7 @@ FluContentPage{
                             text: "教师"
                             Layout.alignment: Qt.AlignVCenter
                             Repeater{
-                                model: backend.getTeacherList4Admin()
+                                model: backend.getTeacherList4Admin("")
                                 delegate: FluMenuItem{
                                     text: modelData.name
                                     onClicked: {
@@ -394,105 +384,169 @@ FluContentPage{
     }
     FluContentDialog{
         id: add_usr
-        title: "新增课程信息"
-        property var teaname
-        property var coursename
-        property var courseterm
-        property var usrperm
-        property var usrmajor
-        property var usrid
+        title: "新增论文信息"
+        property var info : {};
         negativeText: "取消"
         positiveText: "确定"
         buttonFlags: FluContentDialogType.NegativeButton | FluContentDialogType.PositiveButton
-
         contentDelegate: Component{
             Item{
                 implicitWidth: parent.width
-                implicitHeight: 200
+                implicitHeight: 400
                 anchors.fill: parent
                 ColumnLayout{
                     anchors.centerIn: parent
                     spacing: 10
                     Row{
                         FluText{
-                            text: "授课教师"
-                            Layout.alignment: Qt.AlignVCenter
-                        }
-                        FluDropDownButton{
-                            id: teacher_btn
-                            text: "教师"
-                            Layout.alignment: Qt.AlignVCenter
-                            Repeater{
-                                model: backend.getTeacherList4Admin()
-                                delegate: FluMenuItem{
-                                    text: modelData.name
-                                    onClicked: {
-                                        console.log(JSON.stringify(modelData))
-                                        add_usr.usrid = modelData.userid
-                                        teacher_btn.text = modelData.name
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-                    Row{
-                        FluText{
-                            text: "课程名字："
+                            text: "学生姓名"
                             Layout.alignment: Qt.AlignVCenter
                         }
                         FluTextBox{
-                            id: txt_name
+                            id: txt_stuname
                             Layout.fillWidth: true
                             onTextChanged: {
-                                add_usr.coursename = text
+                                add_usr.info.stuname = text
                             }
                         }
                     }
                     Row{
                         FluText{
-                            text: "学期："
-                            Layout.alignment: Qt.AlignVCenter
-                        }
-                        FluDropDownButton{
-                            id: term_btn
-                            text: "学期"
-                            Layout.alignment: Qt.AlignVCenter
-                            Repeater{
-                                model: [1,2,3,4,5,6,7,8]
-                                delegate: FluMenuItem{
-                                    text: modelData
-                                    onClicked: {
-                                        add_usr.courseterm = modelData
-                                        term_btn.text = modelData
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-                    Row{
-                        FluText{
-                            text: "学分："
+                            text: "论文标题"
                             Layout.alignment: Qt.AlignVCenter
                         }
                         FluTextBox{
-                            id: txt_major
-                            text: "0"
+                            id: txt_title
                             Layout.fillWidth: true
                             onTextChanged: {
-                                add_usr.usrmajor = parseFloat(text)
+                                add_usr.info.title = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "作者"
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_author
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                add_usr.info.author = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "期刊名字"
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_journal
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                add_usr.info.journal = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "发表时间"
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_time
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                add_usr.info.time = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "页码"
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_paperNum
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                add_usr.info.paperNum = parseInt(text)
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "卷"
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_volIssue
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                add_usr.info.volIssue = parseInt(text)
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "页码范围"
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_pageRange
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                add_usr.info.pageRange = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "等级"
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_level
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                add_usr.info.level = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "加分"
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_score
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                add_usr.info.score = parseFloat(text)
                             }
                         }
                     }
                 }
             }
         }
-
+        Component.onCompleted: {
+            add_usr.info = {            stuname: "",
+                title: "",
+                author: "",
+                journal: "",
+                time: "",
+                paperNum: 0,
+                volIssue: 0,
+                pageRange: "",
+                level: "",
+                score: 0.0
+            }
+        }
         onPositiveClicked: {
-            let r = backend.addCourseRec4Admin(add_usr.usrid,add_usr.coursename,add_usr.courseterm,add_usr.usrmajor)
+            let r = backend.addArticleRec4Admin(add_usr.info.stuname, add_usr.info.title, add_usr.info.author, add_usr.info.journal, add_usr.info.time, add_usr.info.paperNum, add_usr.info.volIssue, add_usr.info.pageRange, add_usr.info.level, add_usr.info.score)
             table_view.dataSource.push(root.makeData(r));
-            modify.close()
+            add_usr.close()
             showInfo("添加成功")
         }
     }
@@ -514,13 +568,13 @@ FluContentPage{
                 verticalCenter: parent.verticalCenter
             }
             FluButton{
-                text: "导入课程"
+                text: "导入论文"
                 onClicked: ()=>{
                     showError("未实现")
                 }
             }
             FluButton{
-                text: "添加课程"
+                text: "添加论文"
                 onClicked: ()=>{
                     add_usr.open()
                 }
@@ -548,20 +602,6 @@ FluContentPage{
         }
         columnSource:[
             {
-                title: table_view.customItem(com_column_checbox,{checked:false}),
-                dataIndex: 'checkbox',
-                width:100,
-                minimumWidth:100,
-                maximumWidth:100
-            },
-            {
-                title: "教师",
-                dataIndex: "teacher",
-                width: 200,
-                minimumWidth:200,
-                maximumWidth:200
-            },
-            {
                 title: table_view.customItem(com_column_filter_name,{title:"标题"}),
                 dataIndex: 'title',
                 width: 200,
@@ -569,18 +609,59 @@ FluContentPage{
                 maximumWidth:200
             },
             {
-                title: "学期",
-                dataIndex: 'term',
+                title: "学生",
+                dataIndex: "studentname",
                 width: 200,
                 minimumWidth:200,
                 maximumWidth:200
             },
             {
-                title: "学分",
-                dataIndex: 'power',
+                title: "作者",
+                dataIndex: 'author',
+                width: 200,
+                minimumWidth:200,
+                maximumWidth:200
+            },
+            {
+                title: "期刊名字",
+                dataIndex: 'journal',
                 width: 100,
                 minimumWidth:100,
                 maximumWidth:100
+            },
+            {
+                title: "发表时间",
+                dataIndex: 'time',
+                width: 200,
+                minimumWidth:200,
+                maximumWidth:200
+            },
+            {
+                title: "页码",
+                dataIndex: 'paperNum',
+                width: 200,
+                minimumWidth:200,
+                maximumWidth:200
+            },
+            {
+                title: "卷",
+                dataIndex: 'volIssue',
+                width: 200,
+                minimumWidth:200,
+                maximumWidth:200
+            },
+            {
+                title: "等级",
+                dataIndex: 'level',
+                width: 200,
+                minimumWidth:200,
+                maximumWidth:200
+            },{
+                title: '加分',
+                dataIndex: 'score',
+                width: 200,
+                minimumWidth:200,
+                maximumWidth:200
             },
             {
                 title: "操作",
@@ -589,20 +670,26 @@ FluContentPage{
                 minimumWidth:200,
                 maximumWidth:200
             }
+
         ]
     }
     function makeData(data){
         return {
-            checkbox: table_view.customItem(com_checbox,{checked: false}),
-            teacher: data.teachername,
+            aid: data.aid,
+            studentname: data.studentname,
             title: data.title,
-            term: data.term,
-            power: data.power,
+            author: JSON.stringify(data.author),
+            journal: data.journal,
+            time: data.time,
+            paperNum: data.paperNum,
+            volIssue: data.volIssue,
+            level: data.level,
+            score: data.score,
             action: table_view.customItem(com_action,{})
         };
     }
     function loadData(){
-        let datas = backend.getCourseList4Admin();
+        let datas = backend.getArticleList4Admin(nameKeyword);
         const dataSource = []
         for(let data of datas){
             dataSource.push(makeData(data));

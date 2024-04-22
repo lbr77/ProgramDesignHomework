@@ -437,21 +437,23 @@ QJsonObject backendManager::getCourseInfo(int courseid){
 }
 //Score related
 //Read
-QJsonArray backendManager::getScoreList4Stu(){ //权限 > 1
+QJsonArray backendManager::getScoreList4Stu(QString keyword){ //权限 > 1
     if(this->permission <= 0)return QJsonArray(); // No permission
     QJsonArray arr;
 
     for(int i=0;i< sizeList(this->scorelist);i++){
         auto score = (Score *)getListNode(this->scorelist,i);
         if(strcmp(score->studentid,std::move(this->username.toStdString().c_str())) == 0){
+            auto course = this->getCourse(score->courseid);
+            if(course == NULL)continue;
+            // 如果课程名称不包含关键字，则跳过
+            if(!strstr(course->title, std::move(keyword.toStdString().c_str()))&&keyword!="") continue;
             QJsonObject obj;
             obj.insert("courseid",score->courseid);
             obj.insert("studentid",score->studentid);
             obj.insert("scoreid",score->scoreid);
             obj.insert("score",score->score);
             obj.insert("gpa",calcGPA(score->score));
-            auto course = this->getCourse(score->courseid);
-            if(course == NULL)continue;
             obj.insert("title",course->title);
             obj.insert("term",course->term);
             obj.insert("power",course->power);
@@ -460,22 +462,25 @@ QJsonArray backendManager::getScoreList4Stu(){ //权限 > 1
     }
     return arr;
 }
-QJsonArray backendManager::getScoreList4Admin(){
+QJsonArray backendManager::getScoreList4Admin(QString keyword){
     if(this->permission <= 2)return QJsonArray(); // No permission
     QJsonArray arr;
     for(int i=0;i<sizeList(this->scorelist);i++){
         auto score = (Score *)getListNode(this->scorelist,i);
+        auto course = this->getCourse(score->courseid);
+        auto user = this->getUser(score->studentid);
+        if(user == NULL)continue;
+        if(score == NULL)continue;
+        if(course == NULL)continue;
+        if(!strstr(user->name,std::move(keyword).toStdString().c_str())&&keyword!="") continue;
         QJsonObject obj;
         obj.insert("courseid",score->courseid);
         obj.insert("studentid",score->studentid);
         obj.insert("scoreid",score->scoreid);
         obj.insert("score",score->score);
-        auto course = this->getCourse(score->courseid);
-        if(course == NULL)continue;
         obj.insert("title",course->title);
         obj.insert("term",course->term);
         obj.insert("power",course->power);
-        auto user = this->getUser(score->studentid);
         obj.insert("name",user->name);
         obj.insert("major",user->major);
         arr.append(obj);
@@ -569,11 +574,13 @@ int backendManager::deleteScoreRec4Tea(QString sid){
 
 //User related
 //Read
-QJsonArray backendManager::getUserList4Admin(){
+QJsonArray backendManager::getUserList4Admin(QString keyword){
     if(this->permission <= 2)return QJsonArray(); // No permission
     QJsonArray arr;
     for(int i=0;i<sizeList(this->userList);i++){
         auto user = (User *)getListNode(this->userList,i);
+        if(user == NULL)continue;
+        if(!strstr(user->name,std::move(keyword).toStdString().c_str())&&keyword!="") continue;
         QJsonObject obj;
         obj.insert("userid",user->userid);
         obj.insert("name",user->name);
@@ -584,7 +591,7 @@ QJsonArray backendManager::getUserList4Admin(){
     }
     return arr;
 }
-QJsonArray backendManager::getStudentScoreList4Tea(int courseid){
+QJsonArray backendManager::getStudentScoreList4Tea(int courseid,QString keyword){
     if(this->permission <= 1)return QJsonArray(); // No permission
     if(courseid <= 0 || courseid > this->cidx)return QJsonArray(); // Invalid courseid
     QJsonArray arr;
@@ -593,6 +600,8 @@ QJsonArray backendManager::getStudentScoreList4Tea(int courseid){
         auto score = (Score *)getListNode(this->scorelist,i);
         if(score->courseid == cid){
             auto user = this->getUser(score->studentid);
+            if(user == NULL)continue;
+            if(!strstr(user->name,std::move(keyword).toStdString().c_str())&&keyword!="") continue;
             QJsonObject obj;
             obj.insert("scoreid",score->scoreid);
             obj.insert("userid",user->userid);
@@ -625,12 +634,14 @@ void backendManager::changeUserInfo(QString name, int major,QString userid) {
     }
 }
 //Course related
-QJsonArray backendManager::getCourseList4Tea(){
+QJsonArray backendManager::getCourseList4Tea(QString keyword){
     if(this->permission <= 1)return QJsonArray(); // No permission // for teacher admin
     QJsonArray arr;
     for(int i=0;i<sizeList(this->courselist);i++){
         auto course = (Course *)getListNode(this->courselist,i);
+        if(course == NULL)continue;
         if(strcmp(course->teacherid,std::move(this->username).toStdString().c_str()) == 0 || this->permission == 3){
+            if(!strstr(course->title,std::move(keyword).toStdString().c_str())&&keyword!="") continue;
             QJsonObject obj;
             obj.insert("courseid",course->courseid);
             obj.insert("teacherid",course->teacherid);
@@ -740,11 +751,13 @@ QJsonObject backendManager::modifyUserRec4Admin(QString userid, QString name, QS
     return obj;
 }
 
-QJsonArray backendManager::getCourseList4Admin() {
+QJsonArray backendManager::getCourseList4Admin(QString keyword) {
     if(this->permission <= 2)return QJsonArray(); // No permission
     QJsonArray arr;
     for(int i=0;i<sizeList(this->courselist);i++){
         auto course = (Course *)getListNode(this->courselist,i);
+        if(course == NULL)continue;
+        if(!strstr(course->title,std::move(keyword).toStdString().c_str())&&keyword!="") continue;
         QJsonObject obj;
         obj.insert("courseid",course->courseid);
         obj.insert("teacherid",course->teacherid);
@@ -759,12 +772,14 @@ QJsonArray backendManager::getCourseList4Admin() {
     return arr;
 }
 
-QJsonArray backendManager::getTeacherList4Admin() {
+QJsonArray backendManager::getTeacherList4Admin(QString keyword) {
     if(this->permission <= 2)return QJsonArray(); // No permission
     QJsonArray arr;
     for(int i=0;i<sizeList(this->userList);i++){
         auto user = (User *)getListNode(this->userList,i);
+        if(user == NULL)continue;
         if(user->permission == 2){
+            if(!strstr(user->name,std::move(keyword).toStdString().c_str())&&keyword!="") continue;
             QJsonObject obj;
             obj.insert("userid",user->userid);
             obj.insert("name",user->name);
@@ -797,12 +812,14 @@ QJsonObject backendManager::addCourseRec4Admin(QString teacherid, QString title,
     return obj;
 }
 
-QJsonArray backendManager::getArticleList4Stu() {
+QJsonArray backendManager::getArticleList4Stu(QString keyword) {
     if(this->permission <= 1)return QJsonArray(); // No permission
     QJsonArray arr;
     for(int i=0;i<sizeList(this->articlelist);i++){
         auto article = (Article *)getListNode(this->articlelist,i);
         if(strcmp(article->studentid,std::move(this->username).toStdString().c_str()) == 0){
+            // 如果文章标题或作者不包含关键字，则跳过
+            if(!strstr(article->title, std::move(keyword.toStdString().c_str())) && keyword != "") continue;
             QJsonObject obj;
             obj.insert("aid",article->aid);
             obj.insert("studentid",article->studentid);
@@ -824,13 +841,15 @@ QJsonArray backendManager::getArticleList4Stu() {
     }
     return arr;
 }
-
-QJsonArray backendManager::getProjectList4Stu() {
+QJsonArray backendManager::getProjectList4Stu(QString keyword) {
     if(this->permission <= 1)return QJsonArray(); // No permission
     QJsonArray arr;
     for(int i=0;i<sizeList(this->projectlist);i++){
         auto project = (Project *)getListNode(this->projectlist,i);
         if(strcmp(project->studentid,std::move(this->username).toStdString().c_str()) == 0){
+            // 如果项目名称或领导者不包含关键字，则跳过
+            if(!(strstr(project->name, std::move(keyword.toStdString().c_str()))
+            || strstr(project->leader, std::move(keyword.toStdString().c_str()))) && keyword != "" ) continue;
             QJsonObject obj;
             obj.insert("pid",project->pid);
             obj.insert("studentid",project->studentid);
@@ -850,12 +869,14 @@ QJsonArray backendManager::getProjectList4Stu() {
     return arr;
 }
 
-QJsonArray backendManager::getCompetitionList4Stu() {
+QJsonArray backendManager::getCompetitionList4Stu(QString keyword) {
     if(this->permission <= 0)return QJsonArray(); // No permission
     QJsonArray arr;
     for(int i=0;i<sizeList(this->competitionlist);i++){
         auto competition = (Competition *)getListNode(this->competitionlist,i);
         if(strcmp(competition->studentid,std::move(this->username).toStdString().c_str()) == 0){
+// 如果比赛名称不包含关键字，则跳过
+            if(!(strstr(competition->name, std::move(keyword.toStdString().c_str()))) && keyword != "") continue;
             QJsonObject obj;
             obj.insert("cid",competition->cid);
             obj.insert("studentid",competition->studentid);
@@ -878,14 +899,18 @@ QJsonArray backendManager::getCompetitionList4Stu() {
     return arr;
 }
 
-QJsonArray backendManager::getArticleList4Admin() {
+QJsonArray backendManager::getArticleList4Admin(QString keyword) {
     if(this->permission <= 2)return QJsonArray(); // No permission
     QJsonArray arr;
     for(int i=0;i<sizeList(this->articlelist);i++){
         auto article = (Article *)getListNode(this->articlelist,i);
+        if(!strstr(article->title,std::move(keyword).toStdString().c_str())&&keyword!="") continue;
         QJsonObject obj;
         obj.insert("aid",article->aid);
         obj.insert("studentid",article->studentid);
+        auto user = this->getUser(article->studentid);
+        if(user == NULL)continue;
+        obj.insert("studentname",user->name);
         obj.insert("title",article->title);
         QJsonArray author;
         for(int j=0;j<article->nauthor;j++){
@@ -904,11 +929,12 @@ QJsonArray backendManager::getArticleList4Admin() {
     return arr;
 }
 
-QJsonArray backendManager::getProjectList4Admin() {
+QJsonArray backendManager::getProjectList4Admin(QString keyword) {
     if(this->permission <= 2)return QJsonArray(); // No permission
     QJsonArray arr;
     for(int i=0;i<sizeList(this->projectlist);i++){
         auto project = (Project *)getListNode(this->projectlist,i);
+        if(!strstr(project->name,std::move(keyword).toStdString().c_str())&&keyword!="") continue;
         QJsonObject obj;
         obj.insert("pid",project->pid);
         obj.insert("studentid",project->studentid);

@@ -15,7 +15,7 @@ FluContentPage{
         anchors.fill: parent
         chartType: "bar"
         chartData: {
-            let labelD = backend.getCourseList4Tea();
+            let labelD = backend.getCourseList4Tea("");
             let label = []
             let data = []
             let bgCol = []

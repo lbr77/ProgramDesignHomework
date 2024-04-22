@@ -15,9 +15,7 @@ FluContentPage{
     property bool seletedAll: false
     property string nameKeyword: ""
     onNameKeywordChanged: ()=>{
-        table_view.filter(function(item){
-            return item.title.includes(nameKeyword);
-        })
+        loadData()
     }
     Component.onCompleted: ()=>{
         console.log("[INFO] Loading score");
@@ -321,7 +319,7 @@ FluContentPage{
                             text: "教师"
                             Layout.alignment: Qt.AlignVCenter
                             Repeater{
-                                model: backend.getTeacherList4Admin()
+                                model: backend.getTeacherList4Admin("")
                                 delegate: FluMenuItem{
                                     text: modelData.name
                                     onClicked: {
@@ -423,7 +421,7 @@ FluContentPage{
                             text: "教师"
                             Layout.alignment: Qt.AlignVCenter
                             Repeater{
-                                model: backend.getTeacherList4Admin()
+                                model: backend.getTeacherList4Admin("")
                                 delegate: FluMenuItem{
                                     text: modelData.name
                                     onClicked: {
@@ -602,7 +600,7 @@ FluContentPage{
         };
     }
     function loadData(){
-        let datas = backend.getCourseList4Admin();
+        let datas = backend.getCourseList4Admin(nameKeyword);
         const dataSource = []
         for(let data of datas){
             dataSource.push(makeData(data));

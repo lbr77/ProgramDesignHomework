@@ -15,28 +15,12 @@ FluContentPage{
     property int sortType: 0
     property bool seletedAll: true
     property int courseid: -1
-
-    Component.onCompleted: ()=>{
-        courseList = backend.getCourseList4Tea();
-        // dataSource = backend.getScoreList4Tea();
-        let data = [],dt=[]
-        for(let r of courseList){
-            data = backend.getStudentScoreList4Tea(r.courseid);
-            for(let s of data){
-                dt.push({
-                    // checkbox: table_view.customItem(com_checbox,{checked:true}),
-                    courseid: r.courseid,
-                    scoreid: s.scoreid,
-                    title: r.title,
-                    name: s.name,
-                    score: s.score,
-                    term: r.term,
-                    action: table_view.customItem(com_action,{})
-                })
-            }
-        }
-        dataSource = dt
-        table_view.dataSource = root.dataSource
+    property var nameKeyword : ""
+    onNameKeywordChanged: {
+        loadData()
+    }
+    Component.onCompleted: {
+        loadData()
     }
     onCourseidChanged: ()=>{
         table_view.closeEditor()
@@ -345,5 +329,27 @@ FluContentPage{
                 maximumWidth:200
             }
         ]
+    }
+    function loadData(){
+        courseList = backend.getCourseList4Tea(nameKeyword);
+        // dataSource = backend.getScoreList4Tea();
+        let data = [],dt=[]
+        for(let r of courseList){
+            data = backend.getStudentScoreList4Tea(r.courseid);
+            for(let s of data){
+                dt.push({
+                    // checkbox: table_view.customItem(com_checbox,{checked:true}),
+                    courseid: r.courseid,
+                    scoreid: s.scoreid,
+                    title: r.title,
+                    name: s.name,
+                    score: s.score,
+                    term: r.term,
+                    action: table_view.customItem(com_action,{})
+                })
+            }
+        }
+        dataSource = dt
+        table_view.dataSource = root.dataSource
     }
 }

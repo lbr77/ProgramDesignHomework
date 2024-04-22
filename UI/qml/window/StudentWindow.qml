@@ -92,7 +92,7 @@ FluWindow{
                 icon: FluentIcons.BookmarksMirrored
                 FluPaneItem{
                     title: "论文"
-                    url: "qrc:/UI/qml/view/stuQualityView.qml"
+                    url: "qrc:/UI/qml/view/stuArticleView.qml"
                     onTap: ()=>{
                         console.log("[INFO] 切换页面 " + url);
                         nav_view.push(url);
