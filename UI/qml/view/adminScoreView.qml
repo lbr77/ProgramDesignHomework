@@ -16,7 +16,7 @@ FluContentPage{
     property bool seletedAll: true
     property var courseKeyword : ""
     property var nameKeyword : ""
-
+    property int courseid : 0
     onCourseKeywordChanged: {
         loadData()
     }
@@ -24,8 +24,17 @@ FluContentPage{
     onNameKeywordChanged: {
         loadData()
     }
+    onCourseidChanged: {
+        table_view.filter((r)=>{
+            if(courseid === -1){
+                return true
+            }
+            return r.courseid === courseid
+        })
+    }
 
     Component.onCompleted: {
+        courseList = backend.getCourseList4Admin("");
         loadData()
     }
 
@@ -84,6 +93,87 @@ FluContentPage{
         }
     }
 
+
+    FluMenu{
+        id:pop_filter_name
+        width: 200
+        height: 89
+
+        contentItem: Item{
+
+            onVisibleChanged: {
+                if(visible){
+                    name_filter_text.text = root.nameKeyword
+                    name_filter_text.cursorPosition = name_filter_text.text.length
+                    name_filter_text.forceActiveFocus()
+                }
+            }
+
+            FluTextBox{
+                id:name_filter_txt
+                anchors{
+                    left: parent.left
+                    right: parent.right
+                    top: parent.top
+                    leftMargin: 10
+                    rightMargin: 10
+                    topMargin: 10
+                }
+                iconSource: FluentIcons.Search
+            }
+
+            FluButton{
+                text: "搜索"
+                anchors{
+                    bottom: parent.bottom
+                    right: parent.right
+                    bottomMargin: 10
+                    rightMargin: 10
+                }
+                onClicked: {
+                    root.nameKeyword = name_filter_txt.text
+                    pop_filter.close()
+                }
+            }
+
+        }
+        function showPopup(){
+            table_view.closeEditor()
+            pop_filter_name.popup()
+        }
+
+    }
+    Component{
+        id:com_column_filter_name
+        Item{
+            FluText{
+                text: "学生"
+                anchors.centerIn: parent
+            }
+            FluIconButton{
+                width: 20
+                height: 20
+                iconSize: 12
+                verticalPadding:0
+                horizontalPadding:0
+                iconSource: FluentIcons.Filter
+                iconColor: {
+                    if("" !== root.nameKeyword){
+                        return FluTheme.primaryColor
+                    }
+                    return FluTheme.dark ?  Qt.rgba(1,1,1,1) : Qt.rgba(0,0,0,1)
+                }
+                anchors{
+                    right: parent.right
+                    rightMargin: 3
+                    verticalCenter: parent.verticalCenter
+                }
+                onClicked: {
+                    pop_filter_name.showPopup()
+                }
+            }
+        }
+    }
     Component{
         id:com_action
         Item{
@@ -291,14 +381,14 @@ FluContentPage{
         }
         columnSource:[
             {
-                title: "课程名",
+                title: "课程名字",
                 dataIndex: 'title',
                 width: 625,
                 minimumWidth:625,
                 maximumWidth:625
             },
             {
-                title: "名字",
+                title: table_view.customItem(com_column_filter_name,{}),
                 dataIndex: 'name'
             },
             {
@@ -325,10 +415,9 @@ FluContentPage{
         ]
     }
     function loadData(){
-        courseList = backend.getCourseList4Admin(courseKeyword);
         dataSource = backend.getScoreList4Admin(nameKeyword);
         for(var i = 0;i<dataSource.length;i++){
-            dataSource[i].checkbox = table_view.customItem(com_checbox,{"checked":false})
+            dataSource[i].checkbox = table_view.customItem(com_checbox,{checked:true})
             dataSource[i].action = table_view.customItem(com_action,{})
         }
         table_view.dataSource = root.dataSource

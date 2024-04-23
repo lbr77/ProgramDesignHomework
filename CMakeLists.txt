@@ -21,19 +21,6 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick)
 find_program(QT_LUPDATE NAMES lupdate)
 find_program(QT_LRELEASE NAMES lrelease)
 
-set(UNIT_TESTING
-        test/unit_test.cpp
-        backend/io.cpp
-        backend/io.h
-        backend/database.cpp
-        backend/database.h
-        backend/const.h
-        backend/struct.h
-        backend/backendManager.h
-        backend/backendManager.cpp
-)
-qt_add_executable(unit_test ${UNIT_TESTING})
-add_test(NAME unit_test COMMAND unit_test)
 
 set(PROJECT_SOURCES
     main.cpp

@@ -86,7 +86,7 @@ FluContentPage{
             }
 
             FluButton{
-                text: qsTr("Search")
+                text: "搜索"
                 anchors{
                     bottom: parent.bottom
                     right: parent.right

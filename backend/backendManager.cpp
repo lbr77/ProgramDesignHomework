@@ -508,7 +508,7 @@ int backendManager::addUserRec4Admin(QString userid, QString name, QString passw
     return 0;
 }
 double backendManager::getTotalGPA4Stu(){
-    auto scores = this->getScoreList4Stu();
+    auto scores = this->getScoreList4Stu("");
     double GPA = 0.0;
     double totalPower = 0.0;
     for(auto scoree:scores){
@@ -520,7 +520,7 @@ double backendManager::getTotalGPA4Stu(){
     return GPA/totalPower;
 }
 QJsonArray backendManager::getGPAByTerm4Stu() {
-    auto scores = this->getScoreList4Stu();
+    auto scores = this->getScoreList4Stu("");
     double total[9]={};
     double count[9]={};
     for(auto scoret:scores){
@@ -659,7 +659,7 @@ double backendManager::getCoursePercentage4Tea(int courseid) {
     if(courseid <= 0 || courseid > this->cidx)return 0; // Invalid courseid
     int total = 0;
     int count = 0;
-    auto scorelist = this->getStudentScoreList4Tea(courseid);
+    auto scorelist = this->getStudentScoreList4Tea(courseid,"");
     for(auto score:scorelist){
         if( score.toObject()["score"].toInt() >= 60){
             total += 1;
@@ -674,7 +674,7 @@ double backendManager::getScoreAverage(int courseid) {
     if(courseid <= 0 || courseid > this->cidx)return 0; // Invalid courseid
     double total = 0;
     int count = 0;
-    auto scorelist = this->getStudentScoreList4Tea(courseid);
+    auto scorelist = this->getStudentScoreList4Tea(courseid,"");
     for(auto score:scorelist){
         total += score.toObject()["score"].toInt();
         count++;
@@ -1022,7 +1022,7 @@ int backendManager::getRank4Stu() {
 
 double backendManager::getTotalGPA4Stu(QString userid) {
     if(this->permission <= 1)return 0; // No permission
-    auto scores = this->getScoreList4Stu();
+    auto scores = this->getScoreList4Stu("");
     double GPA = 0.0;
     double totalPower = 0.0;
     for(auto scoree:scores){
