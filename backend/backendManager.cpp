@@ -936,8 +936,11 @@ QJsonArray backendManager::getProjectList4Admin(QString keyword) {
         auto project = (Project *)getListNode(this->projectlist,i);
         if(!strstr(project->name,std::move(keyword).toStdString().c_str())&&keyword!="") continue;
         QJsonObject obj;
+        auto student = this->getUser(project->studentid);
+        if(student == NULL)continue;
         obj.insert("pid",project->pid);
         obj.insert("studentid",project->studentid);
+        obj.insert("studentname",student->name);
         obj.insert("name",project->name);
         obj.insert("leader",project->leader);
         QJsonArray member;

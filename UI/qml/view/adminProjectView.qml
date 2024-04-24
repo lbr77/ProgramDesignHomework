@@ -75,8 +75,8 @@ FluContentPage{
                 FluFilledButton{
                     text: "编辑"
                     onClicked: ()=>{
-                        modify.usrid = table_view.getRow(row).userid
-                        modify.open()
+                        modifyProjectDialog.usrid = table_view.getRow(row).userid
+                        modifyProjectDialog.open()
                     }
                 }
             }
@@ -167,7 +167,7 @@ FluContentPage{
         id:com_column_sort_score
         Item{
             FluText{
-                text: "成绩"
+                text: "加分"
                 anchors.centerIn: parent
             }
             ColumnLayout{
@@ -224,14 +224,14 @@ FluContentPage{
     }
 
     FluContentDialog{
-        id: modify
-        title: "修改课程信息"
-        property var usrname
-        property var usrid
-        property var usrpass
-        property var usrperm
-        property var usrmajor
-
+        id: modifyProjectDialog
+        title: "修改项目信息"
+        property var title
+        property var leader
+        property var member
+        property var startTime
+        property var endTime
+        property var score
         negativeText: "取消"
         positiveText: "确定"
         buttonFlags: FluContentDialogType.NegativeButton | FluContentDialogType.PositiveButton
@@ -246,72 +246,79 @@ FluContentPage{
                     spacing: 10
                     Row{
                         FluText{
-                            text: "授课教师"
-                            Layout.alignment: Qt.AlignVCenter
-                        }
-                        FluDropDownButton{
-                            id: teacher_btn
-                            text: "教师"
-                            Layout.alignment: Qt.AlignVCenter
-                            Repeater{
-                                model: backend.getTeacherList4Admin("")
-                                delegate: FluMenuItem{
-                                    text: modelData.name
-                                    onClicked: {
-                                        modify.usrid = modelData.userid
-                                        teacher_btn.text = modelData.name
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-                    Row{
-                        FluText{
-                            text: "课程名字："
+                            text: "标题："
                             Layout.alignment: Qt.AlignVCenter
                         }
                         FluTextBox{
-                            id: txt_name
+                            id: txt_title
                             Layout.fillWidth: true
                             onTextChanged: {
-                                modify.coursename = text
+                                modifyProjectDialog.title = text
                             }
                         }
                     }
                     Row{
                         FluText{
-                            text: "学期："
-                            Layout.alignment: Qt.AlignVCenter
-                        }
-                        FluDropDownButton{
-                            id: term_btn
-                            text: "学期"
-                            Layout.alignment: Qt.AlignVCenter
-                            Repeater{
-                                model: [1,2,3,4,5,6,7,8]
-                                delegate: FluMenuItem{
-                                    text: modelData
-                                    onClicked: {
-                                        modify.courseterm = modelData
-                                        term_btn.text = modelData
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-                    Row{
-                        FluText{
-                            text: "学分："
+                            text: "负责人："
                             Layout.alignment: Qt.AlignVCenter
                         }
                         FluTextBox{
-                            id: txt_major
-                            text: "0"
+                            id: txt_leader
                             Layout.fillWidth: true
                             onTextChanged: {
-                                modify.usrmajor = parseFloat(text)
+                                modifyProjectDialog.leader = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "成员："
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_member
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                modifyProjectDialog.member = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "开始时间："
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_startTime
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                modifyProjectDialog.startTime = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "结束时间："
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_endTime
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                modifyProjectDialog.endTime = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "分数："
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_score
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                modifyProjectDialog.score = parseFloat(text)
                             }
                         }
                     }
@@ -320,20 +327,34 @@ FluContentPage{
         }
 
         onPositiveClicked: {
-            let r = backend.modifyCourseRec4Admin(modify.usrid,modify.coursename,modify.courseterm,modify.usrmajor)
-            loadData()
-            showInfo("修改成功")
+            let data = {
+                pid: 0, // You might need to get the pid of the project to be modified
+                studentname: "", // You might need to fill this
+                title: modifyProjectDialog.title,
+                leader: modifyProjectDialog.leader,
+                member: modifyProjectDialog.member,
+                startTime: modifyProjectDialog.startTime,
+                endTime: modifyProjectDialog.endTime,
+                score: modifyProjectDialog.score,
+                action: table_view.customItem(com_action)
+            };
+            let newData = makeData(data);
+            // You might need to find the index of the project to be modified in the dataSource array
+            let index = 0;
+            root.dataSource[index] = newData;
+            table_view.dataSource = root.dataSource;
+            modifyProjectDialog.close();
         }
     }
     FluContentDialog{
-        id: add_usr
-        title: "新增课程信息"
-        property var teaname
-        property var coursename
-        property var courseterm
-        property var usrperm
-        property var usrmajor
-        property var usrid
+        id: addProjectDialog
+        title: "新增项目信息"
+        property var title
+        property var leader
+        property var member
+        property var startTime
+        property var endTime
+        property var score
         negativeText: "取消"
         positiveText: "确定"
         buttonFlags: FluContentDialogType.NegativeButton | FluContentDialogType.PositiveButton
@@ -348,73 +369,79 @@ FluContentPage{
                     spacing: 10
                     Row{
                         FluText{
-                            text: "授课教师"
-                            Layout.alignment: Qt.AlignVCenter
-                        }
-                        FluDropDownButton{
-                            id: teacher_btn
-                            text: "教师"
-                            Layout.alignment: Qt.AlignVCenter
-                            Repeater{
-                                model: backend.getTeacherList4Admin("")
-                                delegate: FluMenuItem{
-                                    text: modelData.name
-                                    onClicked: {
-                                        console.log(JSON.stringify(modelData))
-                                        add_usr.usrid = modelData.userid
-                                        teacher_btn.text = modelData.name
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-                    Row{
-                        FluText{
-                            text: "课程名字："
+                            text: "标题："
                             Layout.alignment: Qt.AlignVCenter
                         }
                         FluTextBox{
-                            id: txt_name
+                            id: txt_title
                             Layout.fillWidth: true
                             onTextChanged: {
-                                add_usr.coursename = text
+                                addProjectDialog.title = text
                             }
                         }
                     }
                     Row{
                         FluText{
-                            text: "学期："
-                            Layout.alignment: Qt.AlignVCenter
-                        }
-                        FluDropDownButton{
-                            id: term_btn
-                            text: "学期"
-                            Layout.alignment: Qt.AlignVCenter
-                            Repeater{
-                                model: [1,2,3,4,5,6,7,8]
-                                delegate: FluMenuItem{
-                                    text: modelData
-                                    onClicked: {
-                                        add_usr.courseterm = modelData
-                                        term_btn.text = modelData
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-                    Row{
-                        FluText{
-                            text: "学分："
+                            text: "负责人："
                             Layout.alignment: Qt.AlignVCenter
                         }
                         FluTextBox{
-                            id: txt_major
-                            text: "0"
+                            id: txt_leader
                             Layout.fillWidth: true
                             onTextChanged: {
-                                add_usr.usrmajor = parseFloat(text)
+                                addProjectDialog.leader = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "成员："
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_member
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                addProjectDialog.member = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "开始时间："
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_startTime
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                addProjectDialog.startTime = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "结束时间："
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_endTime
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                addProjectDialog.endTime = text
+                            }
+                        }
+                    }
+                    Row{
+                        FluText{
+                            text: "分数："
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        FluTextBox{
+                            id: txt_score
+                            Layout.fillWidth: true
+                            onTextChanged: {
+                                addProjectDialog.score = parseFloat(text)
                             }
                         }
                     }
@@ -423,10 +450,21 @@ FluContentPage{
         }
 
         onPositiveClicked: {
-            let r = backend.addCourseRec4Admin(add_usr.usrid,add_usr.coursename,add_usr.courseterm,add_usr.usrmajor)
-            table_view.dataSource.push(root.makeData(r));
-            modify.close()
-            showInfo("添加成功")
+            let data = {
+                pid: 0, // You might need to generate a unique pid
+                studentname: "", // You might need to fill this
+                title: addProjectDialog.title,
+                leader: addProjectDialog.leader,
+                member: addProjectDialog.member,
+                startTime: addProjectDialog.startTime,
+                endTime: addProjectDialog.endTime,
+                score: addProjectDialog.score,
+                action: table_view.customItem(com_action)
+            };
+            let newData = makeData(data);
+            root.dataSource.push(newData);
+            table_view.dataSource = root.dataSource;
+            addProjectDialog.close();
         }
     }
 
@@ -447,15 +485,15 @@ FluContentPage{
                 verticalCenter: parent.verticalCenter
             }
             FluButton{
-                text: "导入课程"
+                text: "导入项目"
                 onClicked: ()=>{
                     showError("未实现")
                 }
             }
             FluButton{
-                text: "添加课程"
+                text: "添加项目"
                 onClicked: ()=>{
-                    add_usr.open()
+                    addProjectDialog.open()
                 }
             }
             FluButton{
@@ -488,13 +526,6 @@ FluContentPage{
                 maximumWidth:100
             },
             {
-                title: "教师",
-                dataIndex: "teacher",
-                width: 200,
-                minimumWidth:200,
-                maximumWidth:200
-            },
-            {
                 title: table_view.customItem(com_column_filter_name,{title:"标题"}),
                 dataIndex: 'title',
                 width: 200,
@@ -502,18 +533,39 @@ FluContentPage{
                 maximumWidth:200
             },
             {
-                title: "学期",
-                dataIndex: 'term',
+                title: "负责人",
+                dataIndex: 'leader',
                 width: 200,
                 minimumWidth:200,
                 maximumWidth:200
             },
             {
-                title: "学分",
-                dataIndex: 'power',
-                width: 100,
-                minimumWidth:100,
-                maximumWidth:100
+                title: "成员",
+                dataIndex: 'member',
+                width: 200,
+                minimumWidth:200,
+                maximumWidth:200
+            },
+            {
+                title: "开始时间",
+                dataIndex: 'startTime',
+                width: 200,
+                minimumWidth:200,
+                maximumWidth:200
+            },
+            {
+                title: "结束时间",
+                dataIndex: 'endTime',
+                width: 200,
+                minimumWidth:200,
+                maximumWidth:200
+            },
+            {
+                title: table_view.customItem(com_column_sort_score,{title:"加分"}),
+                dataIndex: 'score',
+                width: 200,
+                minimumWidth:200,
+                maximumWidth:200
             },
             {
                 title: "操作",
@@ -527,15 +579,19 @@ FluContentPage{
     function makeData(data){
         return {
             checkbox: table_view.customItem(com_checbox,{checked: false}),
-            teacher: data.teachername,
-            title: data.title,
-            term: data.term,
-            power: data.power,
-            action: table_view.customItem(com_action,{})
+            pid: data.pid,
+            studentname: data.studentname,
+            title: data.name,
+            leader: data.leader,
+            member: JSON.stringify(data.member),
+            startTime: data.starttime,
+            endTime: data.endtime,
+            score: data.score,
+            action: table_view.customItem(com_action)
         };
     }
     function loadData(){
-        let datas = backend.getCourseList4Admin(nameKeyword);
+        let datas = backend.getProjectList4Admin(nameKeyword);
         const dataSource = []
         for(let data of datas){
             dataSource.push(makeData(data));

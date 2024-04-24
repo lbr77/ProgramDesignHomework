@@ -194,7 +194,7 @@ FluContentPage{
         id:com_column_filter_name
         Item{
             FluText{
-                text: "课程名"
+                text: "姓名"
                 anchors.centerIn: parent
             }
             FluIconButton{
